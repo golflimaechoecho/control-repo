@@ -5,6 +5,8 @@ forge 'https://forge.puppet.com'
 #mod 'puppetlabs/inifile', '3.0.0'
 #mod 'puppetlabs/stdlib',  '6.0.0'
 #mod 'puppetlabs/concat',  '6.0.0'
+mod 'danieldreier-autosign', '0.3.0'
+mod 'puppetlabs-stdlib', '6.3.0'
 
 # Modules from Git
 # Examples: https://github.com/puppetlabs/r10k/blob/master/doc/puppetfile.mkd#examples

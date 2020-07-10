@@ -1,0 +1,10 @@
+---
+# using PE = use pe_logpath, pe_journalpath values
+autosign::config:
+  general:
+    loglevel: 'INFO'
+    logfile: '/var/log/puppetlabs/puppetserver/autosign.log'
+  jwt_token:
+    validity: 7200
+    journalfile: '/opt/puppetlabs/server/autosign/autosign.journal'
+    secret: 'W/p5ZEAoY7/niLsSkc9rJsC5wdo='

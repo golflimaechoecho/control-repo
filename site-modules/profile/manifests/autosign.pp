@@ -11,6 +11,8 @@ class profile::autosign {
   $autosign_config = lookup('autosign::config', { 'merge' => 'hash', 'default_value' => {}})
 
   unless $autosign_config.empty {
+    $confdir = '/etc/puppetlabs/puppet'
+
     ini_setting { 'policy-based autosigning':
       setting => 'autosign',
       path    => "${confdir}/puppet.conf",

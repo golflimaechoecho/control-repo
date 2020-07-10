@@ -8,7 +8,7 @@
 class profile::autosign {
 
   # don't do anything if settings not present in hiera
-  $autosign_config = lookup('autosign::config', { 'merge' => Hash, 'default_value' => {}})
+  $autosign_config = lookup('autosign::config', { 'merge' => 'hash', 'default_value' => {}})
 
   unless $autosign_config.empty {
     ini_setting { 'policy-based autosigning':

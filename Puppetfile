@@ -2,13 +2,26 @@ forge 'https://forge.puppet.com'
 
 # Modules from the Puppet Forge
 # Versions should be updated to be the latest at the time you start
-#mod 'puppetlabs/inifile', '3.0.0'
-#mod 'puppetlabs/stdlib',  '6.0.0'
-#mod 'puppetlabs/concat',  '6.0.0'
 mod 'danieldreier-autosign', '0.3.0'
 mod 'puppetlabs-stdlib', '6.3.0'
 mod 'puppetlabs-inifile', '4.2.0'
 mod 'puppet-gitlab', '5.1.0'
+
+# CD4PE requirements (apt omitted as only EL hosts for now; stdlib included above)
+mod 'puppetlabs-cd4pe', '2.0.1'
+mod 'puppetlabs-puppet_authorization', '0.5.1'
+mod 'puppetlabs-hocon', '1.1.0'
+mod 'puppetlabs-concat', '6.2.0'
+mod 'puppetlabs-docker', '3.10.2'
+mod 'puppetlabs-translate', '2.2.0'
+mod 'puppetlabs-cd4pe_jobs', '1.4.0'
+
+# powershell and reboot required for puppetlabs-docker
+mod 'puppetlabs-powershell', '4.0.0' # docker requires <= 4.0.0 but 4.x adds el8 support
+mod 'puppetlabs-reboot', '3.0.0'  # similarly <= 3.0.0 but 3.x updates nodes to targets
+
+# pwshlib required for powershell
+mod 'puppetlabs-pwshlib', '0.4.1'
 
 # Modules from Git
 # Examples: https://github.com/puppetlabs/r10k/blob/master/doc/puppetfile.mkd#examples

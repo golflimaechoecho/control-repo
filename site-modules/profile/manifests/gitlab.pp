@@ -13,4 +13,12 @@ class profile::gitlab {
     mode   => '0755',
     source => 'puppet:///modules/profile/userlist.sh',
   }
+
+  file { '/etc/puppetlabs/facter/facts.d/potato.yaml':
+    ensure  => file,
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
+    content => "potato: true\n",
+  }
 }

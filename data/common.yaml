@@ -1,4 +1,6 @@
 ---
+# common hiera
+
 # list of ciphers from https://github.com/puppetlabs/puppet-enterprise-modules/blob/master/modules/puppet_enterprise/manifests/params.pp
 # Note https://puppet.com/docs/pe/2019.8/configuring_cipher_suites.html is misleading - IANA format does not appear to be acceptable for nginx
 puppet_enterprise::profile::console::proxy::ssl_ciphers:

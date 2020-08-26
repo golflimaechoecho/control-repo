@@ -24,6 +24,7 @@ File { backup => false }
 $datacentre_networks = lookup('datacentre_networks', { 'merge' => 'hash', default_value => {}})
 
 $datacentre_networks.each | String $dc, Array $dc_networks | {
+  notify { "checking dc ${dc}": }
   if $facts['networking']['network'] in $dc_networks {
     $datacentre = $dc
     break()
@@ -35,8 +36,7 @@ unless defined('$datacentre') {
   $datacentre = "Unable to determine datacentre from list of networks provided"
 }
 
-notify { "datacentre is ${datacentre}":
-}
+notify { "datacentre is ${datacentre}": }
 
 ## Node Definitions ##
 

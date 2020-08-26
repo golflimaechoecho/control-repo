@@ -23,7 +23,10 @@ mod 'puppetlabs-reboot', '3.0.0'  # similarly <= 3.0.0 but 3.x updates nodes to 
 # pwshlib required for powershell
 mod 'puppetlabs-pwshlib', '0.4.1'
 
+# windows labs
 mod 'puppetlabs-dsc', '1.9.4'
+mod 'puppetlabs-acl', '3.2.0'
+
 # Modules from Git
 # Examples: https://github.com/puppetlabs/r10k/blob/master/doc/puppetfile.mkd#examples
 #mod 'apache',

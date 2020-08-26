@@ -2,6 +2,7 @@
 class profile::windows {
   $user  = 'gluser'
   $group = 'glgroup'
+  $userdir = "C:\\ProgramData\\${user}"
 
   user { $user:
     ensure     => present,
@@ -16,9 +17,22 @@ class profile::windows {
     dsc_identity => $user,
     dsc_policy   => 'Log_on_as_a_service',
   }
-  file { "C:\\ProgramData\\${user}":
+  file { $userdir:
     ensure => directory,
     owner  => $user,
     group  => $group,
+  }
+  acl { $userdir:
+    permissions  => [
+      { identity => $user, rights => ['full'] },
+      { identity => $group, rights => ['read'] },
+    ],
+  }
+  acl { "remove_${user}":
+    target       => $userdir,
+    purge        => 'listed_permissions',
+    permissions  => [
+      { identity => $group, rights => ['full'] },
+    ],
   }
 }

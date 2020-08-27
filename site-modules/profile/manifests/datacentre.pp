@@ -1,4 +1,4 @@
-# populate datacentre fact using datacentre top-scope variable set in site.pp
+# populate datacentre fact using datacentre top-scope variable $dc set in site.pp
 # Note: fact will not be available in the first run as it needs to be set using
 # the variable; however it can be used from second run onwards for classification
 #
@@ -20,10 +20,6 @@ class profile::datacentre {
         'group' => 'root',
         'mode'  => '0644',
       }
-      # correct previous stuff up
-      file { '/datacentre.yaml':
-        ensure => absent,
-      }
     }
   }
 
@@ -39,7 +35,7 @@ class profile::datacentre {
 
   file { $factpath:
     ensure  => file,
-    content => "---${newline_char}datacentre: ${datacentre}${newline_char}",
+    content => "---${newline_char}datacentre: $::{dc}${newline_char}",
     *       => $ownership_attrs,
   }
 }

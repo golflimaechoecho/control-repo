@@ -35,7 +35,7 @@ class profile::datacentre {
 
   file { $factpath:
     ensure  => file,
-    content => "---${newline_char}datacentre: $::{dc}${newline_char}",
+    content => "---${newline_char}datacentre: ${::dc}${newline_char}",
     *       => $ownership_attrs,
   }
 }

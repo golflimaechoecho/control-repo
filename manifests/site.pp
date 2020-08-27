@@ -14,29 +14,21 @@
 File { backup => false }
 
 # determine datacentre based on list of networks defined in hiera
-# note: can't use this to classify as it's not a fact
+# note: this is topscope var not a fact so can't use on console - use to populate external fact?
 # possible pitfalls/gotchas:
 # - current example matches on primary interface network only
-# - breaks at first match (ie: if more-specific match defined later it won't get there)
+# - returns first match (ie: if more-specific match defined later it won't get there)
 # - matching may need to be refined (and/or add validation to prevent input of bad networks)
-
 
 $datacentre_networks = lookup('datacentre_networks', { 'merge' => 'hash', default_value => {}})
 
-$datacentre_networks.each | String $dc, Array $dc_networks | {
-  notify { "checking dc ${dc}": }
-  if $facts['networking']['network'] in $dc_networks {
-    $datacentre = $dc
-    break()
+# index() requires puppet 6.x+; pick() requires stdlib
+$dc_index =
+  $datacentre_networks.index | String $dc, Array $dc_networks | {
+    $facts['networking']['network'] in $dc_networks
   }
-}
+$datacentre = pick($dc_index, 'undefined_datacentre')
 
-# if datacentre is not defined at this point it has not been found
-unless defined('$datacentre') {
-  $datacentre = "Unable to determine datacentre from list of networks provided"
-}
-
-notify { "datacentre is ${datacentre}": }
 
 ## Node Definitions ##
 

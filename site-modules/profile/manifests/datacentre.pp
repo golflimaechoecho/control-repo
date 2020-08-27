@@ -6,19 +6,23 @@ class profile::datacentre {
   # os specific factpath, separator, newline
   case $facts['os']['name'] {
     'windows': {
-      $factdir = 'C:\\ProgramData\\PuppetLabs\\facter\\facts.d\\'
-      $separator_char = '\\'
+      # OK to use forward slash for file path attribute
+      # https://puppet.com/docs/puppet/6.17/lang_windows_file_paths.html
+      $factdir = 'C:/ProgramData/PuppetLabs/facter/facts.d'
       $newline_char = "\r\n"
       $ownership_attrs = {}
     }
     default: {
-      $factdir = '/etc/puppetlabs/facter/facts.d/'
-      $separator_char = '/'
+      $factdir = '/etc/puppetlabs/facter/facts.d'
       $newline_char = "\n"
       $ownership_attrs = {
         'owner' => 'root',
         'group' => 'root',
         'mode'  => '0644',
+      }
+      # correct previous stuff up
+      file { '/datacentre.yaml':
+        ensure => absent,
       }
     }
   }
@@ -26,8 +30,7 @@ class profile::datacentre {
   $dirname_one_up = dirname($factdir)
   $dirname_two_up = dirname($dirname_one_up)
 
-  $factpath = "${factpath}${separator_char}datacentre.yaml"
-
+  $factpath = "${factdir}/datacentre.yaml"
 
   # ensure parent dir(s) exist
   file { [ $dirname_two_up, $dirname_one_up ]:

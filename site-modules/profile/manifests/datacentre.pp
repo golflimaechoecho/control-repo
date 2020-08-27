@@ -28,12 +28,11 @@ class profile::datacentre {
   }
 
   $dirname_one_up = dirname($factdir)
-  $dirname_two_up = dirname($dirname_one_up)
 
   $factpath = "${factdir}/datacentre.yaml"
 
   # ensure parent dir(s) exist
-  file { [ $dirname_two_up, $dirname_one_up ]:
+  file { [ $dirname_one_up, $factdir ]:
     ensure => directory,
     *      => $ownership_attrs,
   }

@@ -27,6 +27,9 @@ mod 'puppetlabs-pwshlib', '0.4.1'
 mod 'puppetlabs-dsc', '1.9.4'
 mod 'puppetlabs-acl', '3.2.0'
 
+# ca_extend testing
+mod 'puppetlabs-ca_extend', '1.1.1'
+
 # Modules from Git
 # Examples: https://github.com/puppetlabs/r10k/blob/master/doc/puppetfile.mkd#examples
 #mod 'apache',

@@ -5,5 +5,5 @@ plan profile::patch_workflow (
 ) {
   run_plan('reboot', targets => $targets, reconnect_timeout => $reconnect_timeout)
 
-  return run_task('pe_patch::patch_server', targets => $targets, reboot => 'patched')
+  return run_task('pe_patch::patch_server', $targets, reboot => 'patched')
 }

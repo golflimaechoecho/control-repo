@@ -1,0 +1,14 @@
+---
+wsusserver::package_ensure: 'present'
+wsusserver::update_languages: ['en']
+wsusserver::products:
+  - 'Active Directory Rights Management Services Client 2.0'
+  - 'ASP.NET Web Frameworks'
+  - 'Microsoft SQL Server 2012'
+  - 'SQL Server Feature Pack'
+  - 'SQL Server 2012 Product Updates for Setup'
+  - 'Windows Server 2016'
+wsusserver::update_classifications:
+  - 'Critical Updates'
+  - 'Security Updates'
+  - 'Updates'

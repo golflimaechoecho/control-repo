@@ -1,5 +1,7 @@
 # profile for windows
 class profile::windows {
+  include profile::wsus_client
+
   $user  = 'gluser'
   $group = 'glgroup'
   $userdir = "C:\\ProgramData\\${user}"

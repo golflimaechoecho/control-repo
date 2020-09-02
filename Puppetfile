@@ -32,6 +32,7 @@ mod 'puppetlabs-ca_extend', '1.1.1'
 
 mod 'tragiccode-wsusserver', '1.1.3'
 mod 'puppetlabs-wsus_client', '3.1.0'
+mod 'puppetlabs-registry', '3.1.1'
 
 # Modules from Git
 # Examples: https://github.com/puppetlabs/r10k/blob/master/doc/puppetfile.mkd#examples

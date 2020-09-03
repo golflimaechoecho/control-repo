@@ -22,8 +22,6 @@ profile::wsusserver::computer_target_groups: ['Development', 'Test', 'Production
 
 # Automatic approval rules
 profile::wsusserver::approvalrules:
-  'Default Automatic Approval Rule':
-    ensure: absent
   'Automatic Approval for Security and Critical Updates Rule':
     ensure: present
     enabled: true

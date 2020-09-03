@@ -20,6 +20,34 @@
 #         'Updates',
 #     ],
 # }
-class profile::wsusserver {
+class profile::wsusserver (
+  Hash $approvalrule_overrides = {},
+){
   include ::wsusserver
+
+  $computer_target_groups = lookup('profile::wsusserver::computer_target_groups',
+                                    { 'value_type'    => Array[String],
+                                      'merge'         => 'unique',
+                                      'default_value' => [],
+                                    })
+
+  $computer_target_groups.each | String $target_group | {
+    wsusserver_computer_target_group { $target_group:
+      ensure => present,
+    }
+  }
+
+  $approvalrules = lookup('profile::wsusserver::approvalrules',
+                          { 'value_type'    => Hash,
+                            'merge'         => 'hash',
+                            'default_value' => {},
+                          })
+
+  $approvalrules_real = $approvalrules + $approvalrule_overrides
+
+  $approvalrules_real.each | String $approvalrule, Hash $rule_attributes | {
+    wsusserver::approvalrule { $approvalrule:
+      * => $rule_attributes,
+    }
+  }
 }

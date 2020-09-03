@@ -39,3 +39,5 @@ message: "This node is using common data"
 
 # default setting for wsus_client
 wsus_client::server_url: 'http://w2016glwsus.platform9.puppet.net:8530'
+# default wsus_client target group to production if haven't found one by this point
+wsus_client::target_group: 'Production'

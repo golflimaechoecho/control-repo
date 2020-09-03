@@ -1,0 +1,2 @@
+---
+wsus_client::target_group: 'Production'

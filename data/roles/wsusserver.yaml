@@ -13,3 +13,20 @@ wsusserver::update_classifications:
   - 'Critical Updates'
   - 'Security Updates'
   - 'Updates'
+
+# Computer target groups
+# Set on client using wsus_client (apptier/environment-specific)
+# https://docs.microsoft.com/en-us/windows-server/administration/windows-server-update-services/manage/managing-wsus-client-computers-and-wsus-computer-groups
+# https://docs.microsoft.com/de-de/security-updates/windowsupdateservices/18127378#:~:text=With%20server%2Dside%20targeting%2C%20you%20use%20the%20WSUS%20console%20to,computers%20into%20computer%20groups%20manually.
+profile::wsusserver::computer_target_groups: ['Development', 'Test', 'Production']
+
+# Automatic approval rules
+profile::wsusserver::approvalrules:
+  'Default Automatic Approval Rule':
+    ensure: absent
+  'Automatic Approval for Security and Critical Updates Rule':
+    ensure: present
+    enabled: true
+    classifications: ['Security Updates', 'Critical Updates']
+    products: ['Windows Server 2016', 'Windows Server 2019']
+    computer_groups: ['Development', 'Test', 'Production']

@@ -1,0 +1,11 @@
+{
+  "input_method": "stdin",
+  "parameters": {},
+  "implementations": [
+    { "name": "pe_patch_locked.sh", "requirements": ["shell"]},
+    { "name": "pe_patch_locked.ps1", "requirements": ["powershell"]}
+  ],
+  "puppet_task_version": 1,
+  "supports_noop": false,
+  "description": "Check whether pe_patch is locked"
+}

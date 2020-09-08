@@ -3,13 +3,13 @@
 # requires the reboot::sleep function
 #
 # @param targets Targets to check
-# @param recheck_timeout How long (in seconds) to attempt to recheck before giving up. Defaults to 600.
-# @param retry_interval How long (in seconds) to wait between retries. Defaults to 5.
+# @param lock_check_timeout How long (in seconds) to attempt to recheck before giving up. Defaults to 600.
+# @param lock_retry_interval How long (in seconds) to wait between retries. Defaults to 5.
 # @param fail_plan_on_errors Raise an error if any targets do not successfully unlock. Defaults to true.
 plan profile::pe_patch_lock_check (
   TargetSpec $targets,
-  Integer[0] $recheck_timeout = 600,
-  Integer[0] $retry_interval = 5,
+  Integer[0] $lock_check_timeout = 600,
+  Integer[0] $lock_retry_interval = 5,
   Boolean    $fail_plan_on_errors = true,
 ) {
 
@@ -32,7 +32,7 @@ plan profile::pe_patch_lock_check (
   ## Mark finished for targets that are unlocked
   ## If we still have targets check for timeout, sleep if not done.
   $wait_results = without_default_logging() || {
-    $recheck_timeout.reduce({'pending' => $begin_lock_results.targets(), 'ok' => []}) |$memo, $_| {
+    $lock_check_timeout.reduce({'pending' => $begin_lock_results.targets(), 'ok' => []}) |$memo, $_| {
       if ($memo['pending'].empty() or $memo['timed_out']) {
         break()
       }
@@ -58,13 +58,13 @@ plan profile::pe_patch_lock_check (
       $ok_targets = $memo['pending'] - $failed_targets
       # Calculate whether or not timeout has been reached
       $elapsed_time_sec = Integer(Timestamp() - $start_time)
-      $timed_out = $elapsed_time_sec >= $recheck_timeout
+      $timed_out = $elapsed_time_sec >= $lock_check_timeout
       if !$failed_targets.empty() and !$timed_out {
         # sleep for a small time before trying again
-        reboot::sleep($retry_interval)
+        reboot::sleep($lock_retry_interval)
         # wait for all targets to be available again
-        $remaining_time = $recheck_timeout - $elapsed_time_sec
-        wait_until_available($failed_targets, wait_time => $remaining_time, retry_interval => $retry_interval)
+        $remaining_time = $lock_check_timeout - $elapsed_time_sec
+        wait_until_available($failed_targets, wait_time => $remaining_time, retry_interval => $lock_retry_interval)
       }
       # Build and return the memo for this iteration
       ({

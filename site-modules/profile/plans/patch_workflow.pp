@@ -87,7 +87,7 @@ plan profile::patch_workflow (
     $target_name = $pre_result.target().name()
     $post_result = $services_after_patching.find($target_name)
     $pre_result['service'].keys.each | $pre_service_name | {
-      if $pre_service_name in $post_result.keys() {
+      if $pre_service_name in $post_result['service'].keys() {
         if $pre_result['service'][$pre_service_name]['ensure'] != $post_result['service'][$pre_service_name]['ensure'] {
           # ensure (running/stopped) is not in the same state as prior to patching
           $memo + { $target_name => { $pre_service_name => "state changed, now ${post_result['service'][$pre_service_name]['ensure']}" } }

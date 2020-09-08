@@ -66,10 +66,12 @@ plan profile::patch_workflow (
           # ensure (running/stopped) is not in the same state as prior to patching
           $memo + { $target_name => { $pre_service_name => "state changed, now ${post_result['service'][$pre_service_name]['ensure']}" } }
 
+        }
+      } else {
+        # service missing from post_result
+        $memo + { $target_name => { $pre_service_name => "no longer present" } }
       }
-    } else {
-      # service missing from post_result
-      $memo + { $target_name => { $pre_service_name => "no longer present" } }
+    }
   }
 
   return $patch_result

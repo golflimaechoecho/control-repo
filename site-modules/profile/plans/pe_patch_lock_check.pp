@@ -24,7 +24,7 @@ plan profile::pe_patch_lock_check (
   }
 
   # only care about targets that are locked
-  $begin_lock_results = $check_lock_results.filter | String $key, Boolean $value | { $value == true }
+  $begin_lock_results = $check_lock_results.filter_set | $res | { $res['pe_patch_locked'] == true }
 
   $start_time = Timestamp()
   # Wait to unlock in a loop

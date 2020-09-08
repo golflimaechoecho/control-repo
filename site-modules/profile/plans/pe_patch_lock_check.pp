@@ -20,7 +20,7 @@ plan profile::pe_patch_lock_check (
 
   # Get current lock status
   $check_lock_results = without_default_logging() || {
-    run_task('profile::pe_patch_locked', $targets_objects)
+    run_task('profile::pe_patch_locked', $target_objects)
   }
 
   # only care about targets that are locked

@@ -11,7 +11,6 @@ plan profile::patch_workflow (
   Integer[0] $lock_retry_interval = 5,
   Boolean    $fail_plan_on_errors = true,
 ) {
-) {
   run_plan('reboot', targets => $targets, reconnect_timeout => $reconnect_timeout)
 
   run_plan('profile::pe_patch_lock_check', targets => $targets, lock_check_timeout => $lock_check_timeout)

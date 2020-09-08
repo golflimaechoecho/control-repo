@@ -9,4 +9,4 @@ if (Test-Path $LockFile) {
 } else {
   $result = false
 }
-Write-Output "{""pe_patch_locked"":${result}}"
+Write-Output "{""pe_patch_locked"":""${result}""}"

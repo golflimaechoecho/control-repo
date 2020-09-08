@@ -36,6 +36,12 @@ mod 'puppetlabs-registry', '3.1.1'
 
 mod 'encore-patching', '1.1.1'
 mod 'puppetlabs-puppet_agent', '4.1.1'
+
+mod 'bnm_patching',
+  :git => 'git@gl-gitlab.platform9.puppet.net:p9/bnm_patching.git',
+  :branch => :control_branch,
+  :default_branch => 'production'
+
 # Modules from Git
 # Examples: https://github.com/puppetlabs/r10k/blob/master/doc/puppetfile.mkd#examples
 #mod 'apache',

@@ -25,7 +25,6 @@ plan profile::patch_workflow (
 
   # placeholder for patching::snapshot_vmware, replace once firewall rules in place/confirmed working
   run_plan('profile::snapshot_placeholder', targets              => $targets,
-                                            action               => 'create',
                                             target_name_property => $target_name_property,
                                             vsphere_host         => $vsphere_host,
                                             vsphere_username     => $vsphere_username,

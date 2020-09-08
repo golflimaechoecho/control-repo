@@ -5,8 +5,8 @@
 [String]$LockFile = "$($env:programdata)\pe_patch\pe_patch_groups.lock"
 
 if (Test-Path $LockFile) {
-  result = true
+  $result = true
 } else {
-  result = false
+  $result = false
 }
 Write-Output "{""pe_patch_locked"":${result}}"

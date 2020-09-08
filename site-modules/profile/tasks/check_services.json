@@ -1,10 +1,6 @@
 {
   "input_method": "stdin",
   "parameters": {},
-  "implementations": [
-    { "name": "check_services.sh", "requirements": ["shell"]},
-    { "name": "check_services.ps1", "requirements": ["powershell"]}
-  ],
   "puppet_task_version": 1,
   "supports_noop": false,
   "description": "Check service status"

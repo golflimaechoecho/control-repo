@@ -5,4 +5,4 @@ LOCKFILE=/var/run/pe_patch_fact_generation.lock
 } || {
   result=false
 }
-echo "{\"locked\": $result}"
+echo "{\"pe_patch_locked\": $result}"

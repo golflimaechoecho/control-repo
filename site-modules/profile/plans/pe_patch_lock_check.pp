@@ -1,14 +1,15 @@
 # check if pe_patch locked and attempt to wait until no longer locked
+# Note: checks for the presence of lockfile only
 # requires the reboot::sleep function
 #
 # @param targets Targets to check
 # @param recheck_timeout How long (in seconds) to attempt to recheck before giving up. Defaults to 600.
-# @param retry_interval How long (in seconds) to wait between retries. Defaults to 1.
+# @param retry_interval How long (in seconds) to wait between retries. Defaults to 5.
 # @param fail_plan_on_errors Raise an error if any targets do not successfully unlock. Defaults to true.
 plan profile::pe_patch_lock_check (
   TargetSpec $targets,
   Integer[0] $recheck_timeout = 600,
-  Integer[0] $retry_interval = 1,
+  Integer[0] $retry_interval = 5,
   Boolean    $fail_plan_on_errors = true,
 ) {
 
@@ -18,41 +19,37 @@ plan profile::pe_patch_lock_check (
   if $target_objects.empty { return ResultSet.new([]) }
 
   # Get current lock status
-  $begin_check_results = without_default_logging() || {
+  $check_lock_results = without_default_logging() || {
     run_task('profile::pe_patch_locked', $targets_objects)
   }
 
-  # Wait long enough for all targets to trigger reboot, plus disconnect_wait to allow for shutdown time.
-  $timeouts = $reboot_result.map |$result| { $result['timeout'] }
-  $wait = max($timeouts)
-  reboot::sleep($wait+$disconnect_wait)
+  # only care about targets that are locked
+  $begin_lock_results = $check_lock_results.filter | String $key, Boolean $value | { $value == true }
 
   $start_time = Timestamp()
-  # Wait for reboot in a loop
+  # Wait to unlock in a loop
   ## retrieve latest locked status
   ## Mark finished for targets that are unlocked
   ## If we still have targets check for timeout, sleep if not done.
   $wait_results = without_default_logging() || {
-    $reconnect_timeout.reduce({'pending' => $target_objects, 'ok' => []}) |$memo, $_| {
+    $recheck_timeout.reduce({'pending' => $begin_lock_results.targets(), 'ok' => []}) |$memo, $_| {
       if ($memo['pending'].empty() or $memo['timed_out']) {
         break()
       }
 
       $plural = if $memo['pending'].size() > 1 { 's' }
       out::message("Waiting: ${$memo['pending'].size()} target${plural} locked")
-      $current_boot_time_results = run_task('reboot::last_boot_time', $memo['pending'], _catch_errors => true)
-      # Compare boot times
-      $failed_results = $current_boot_time_results.filter |$current_boot_time_res| {
+      $current_lock_results = run_task('profile::pe_patch_locked', $memo['pending'], _catch_errors => true)
+      # Compare lock results
+      $failed_results = $current_lock_results.filter |$current_lock_res| {
         # If this one errored, need to check it again
-        if !$current_boot_time_res.ok() {
+        if !$current_lock_res.ok() {
           true
         }
         else {
-          # If this succeeded, then we have a boot time, compare it against the begin_boot_time
-          $target_name = $current_boot_time_res.target().name()
-          $begin_boot_time_res = $begin_boot_time_results.find($target_name)
-          # If the boot times are the same, then we need to check it again
-          $current_boot_time_res.value() == $begin_boot_time_res.value()
+          # If this succeeded, check if it is locked
+          $target_name = $current_lock_res.target().name()
+          $current_lock_res['pe_patch_locked']
         }
       }
       # $failed_results is an array of results, turn it into a ResultSet so we can
@@ -61,12 +58,12 @@ plan profile::pe_patch_lock_check (
       $ok_targets = $memo['pending'] - $failed_targets
       # Calculate whether or not timeout has been reached
       $elapsed_time_sec = Integer(Timestamp() - $start_time)
-      $timed_out = $elapsed_time_sec >= $reconnect_timeout
+      $timed_out = $elapsed_time_sec >= $recheck_timeout
       if !$failed_targets.empty() and !$timed_out {
         # sleep for a small time before trying again
         reboot::sleep($retry_interval)
         # wait for all targets to be available again
-        $remaining_time = $reconnect_timeout - $elapsed_time_sec
+        $remaining_time = $recheck_timeout - $elapsed_time_sec
         wait_until_available($failed_targets, wait_time => $remaining_time, retry_interval => $retry_interval)
       }
       # Build and return the memo for this iteration
@@ -79,7 +76,7 @@ plan profile::pe_patch_lock_check (
   }
   $err = {
     msg  => 'Target failed to unlock before wait timeout.',
-    kind => 'bolt/reboot-timeout',
+    kind => 'bolt/unlock-timeout',
   }
   $error_set = $wait_results['pending'].map |$target| {
     Result.new($target, {

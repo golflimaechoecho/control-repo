@@ -1,10 +1,37 @@
 # plan to run patch workflow
 #
 # @param targets Targets to patch
+# @param [Optional[Enum['hostname', 'name', 'uri']]] target_name_property
+#   Determines what property on the Target object will be used as the VM name when
+#   mapping the Target to a VM in vSphere.
+#
+#    - `uri` : use the `uri` property on the Target. This is preferred because
+#       If you specify a list of Targets in the inventory file, the value shown in that
+#       list is set as the `uri` and not the `name`, in this case `name` will be `undef`.
+#    - `name` : use the `name` property on the Target, this is not preferred because
+#       `name` is usually a short name or nickname.
+#    - `hostname`: use the `hostname` value to use host component of `uri` property on the Target
+#      this can be useful if VM name doesn't include domain name
+#
+# @param [String[1]] vsphere_host
+#   Hostname of the vSphere server that we're going to use to create snapshots via the API.
+#
+# @param [String[1]] vsphere_username
+#   Username to use when authenticating with the vSphere API.
+#
+# @param [String[1]] vsphere_password
+#   Password to use when authenticating with the vSphere API.
+#
+# @param [String[1]] vsphere_datacenter
+#   Name of the vSphere datacenter to search for VMs under.
+#
+# @param [Boolean] vsphere_insecure
+#   Flag to enable insecure HTTPS connections by disabling SSL server certificate verification.
 # @param reconnect_timeout How long (in seconds) to attempt to reconnect after reboot before giving up. Defaults to 180.
 # @param lock_check_timeout How long (in seconds) to attempt to recheck before giving up. Defaults to 600.
 # @param lock_retry_interval How long (in seconds) to wait between retries. Defaults to 5.
 # @param fail_plan_on_errors Raise an error if any targets do not successfully unlock. Defaults to true.
+#
 plan profile::patch_workflow (
   TargetSpec $targets,
   Optional[Enum['hostname', 'name', 'uri']] $target_name_property = undef,

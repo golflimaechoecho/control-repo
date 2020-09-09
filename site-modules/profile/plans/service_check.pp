@@ -45,5 +45,5 @@ plan profile::service_check (
     }
   }
 
-  return $memo
+  return $changed_services
 }

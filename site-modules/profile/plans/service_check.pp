@@ -35,11 +35,12 @@ plan profile::service_check (
       if $pre_service_name in $post_result['service'].keys() {
         if $pre_result['service'][$pre_service_name]['ensure'] != $post_result['service'][$pre_service_name]['ensure'] {
           # ensure (running/stopped) is not in the same state as prior to patching
+          out::message("${target_name}: ${pre_service_name} state changed, now ${post_result['service'][$pre_service_name]['ensure']}")
           $memo + { $target_name => { $pre_service_name => "state changed, now ${post_result['service'][$pre_service_name]['ensure']}" } }
-
         }
       } else {
         # service missing from post_result
+        out::message("${target_name} ${pre_service_name} no longer present")
         $memo + { $target_name => { $pre_service_name => "no longer present" } }
       }
     }

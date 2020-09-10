@@ -72,7 +72,6 @@ plan profile::service_testing (
         })
       }
     }
-    out::message($reduced_services)
     $memo + { $target_name => $reduced_services }
   }
 

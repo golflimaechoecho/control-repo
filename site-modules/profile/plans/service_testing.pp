@@ -30,37 +30,38 @@ plan profile::service_testing (
 
   # check if any services from before patching are not running
   # this doesn't check for any new services (ie: that didn't exist prior to patching)
-  $changed_results = $services_before_patching.reduce({}) | $memo, $pre_result | {
-    $target_name = $pre_result.target().name()
-    $post_result = $services_after_patching.find($target_name)
-
-    # filter hash for services that have changed
-    $changed_services = $pre_result['service'].filter | $pre_service_name, $pre_service_values | {
-      if $pre_service_name in $post_result['service'].keys() {
-        # ensure (running/stopped) is not in the same state as prior to patching
-        $pre_result['service'][$pre_service_name]['ensure'] != $post_result['service'][$pre_service_name]['ensure']
-      } else {
-        true
-      }
-    }
-
-    $change_hash = $changed_services.reduce({}) | $svc_memo, $svc | {
-      $pre_service_name = $svc[0]
-      if $pre_service_name in $post_result['service'].keys() {
-        $svc_memo + { $pre_service_name => "state changed, now ${post_result['service'][$pre_service_name]['ensure']}" }
-        out::message("${target_name} ${pre_service_name} state changed, now ${post_result['service'][$pre_service_name]['ensure']}")
-      } else {
-        $svc_memo + { $pre_service_name => 'missing/no longer present' }
-        out::message("${target_name} ${pre_service_name} no longer present")
-      }
-    }
-    $memo + { $target_name => $change_hash }
-  }
+  #  $changed_results = $services_before_patching.reduce({}) | $memo, $pre_result | {
+  #    $target_name = $pre_result.target().name()
+  #    $post_result = $services_after_patching.find($target_name)
+  #
+  #    # filter hash for services that have changed
+  #    $changed_services = $pre_result['service'].filter | $pre_service_name, $pre_service_values | {
+  #      if $pre_service_name in $post_result['service'].keys() {
+  #        # ensure (running/stopped) is not in the same state as prior to patching
+  #        $pre_result['service'][$pre_service_name]['ensure'] != $post_result['service'][$pre_service_name]['ensure']
+  #      } else {
+  #        true
+  #      }
+  #    }
+  #
+  #    $change_hash = $changed_services.reduce({}) | $svc_memo, $svc | {
+  #      $pre_service_name = $svc[0]
+  #      if $pre_service_name in $post_result['service'].keys() {
+  #        $svc_memo + { $pre_service_name => "state changed, now $post_result['service'][$pre_service_name]['ensure']" }
+  #        out::message("${target_name} ${pre_service_name} state changed, now ${post_result['service'][$pre_service_name]['ensure']}")
+  #      } else {
+  #        $svc_memo + { $pre_service_name => 'no longer present' }
+  #        out::message("${target_name} ${pre_service_name} no longer present")
+  #      }
+  #    }
+  #    $memo + { $target_name => $change_hash }
+  #  }
+  #
 
   # start example services again
   $example_services.each | $service_name | {
     run_task('service', $targets, name => $service_name, action => 'stop')
   }
 
-  return $changed_results
+  #return $changed_results
 }

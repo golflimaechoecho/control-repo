@@ -53,7 +53,7 @@ plan profile::service_testing (
     $target_name = $pre_result.target().name()
     $post_result = $services_after_patching.find($target_name)
 
-    $reduced_services = $pre_result['service'].reduce({ 'changed' => {}}) | $svcmemo, $pre_service_hash | {
+    $reduced_services = $pre_result['service'].reduce({ 'changed' => []}) | $svcmemo, $pre_service_hash | {
       $pre_service_name = $pre_service_hash[0]
       #out::message($pre_service_name)
       if $pre_service_name in $post_result['service'].keys() {
@@ -72,7 +72,9 @@ plan profile::service_testing (
         })
       }
     }
-    $memo + { $target_name => $reduced_services }
+    if ! $reduced_services['changed'].empty {
+      $memo + { $target_name => $reduced_services }
+    }
   }
 
   # reduced_results should be a hash

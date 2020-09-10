@@ -1,5 +1,5 @@
 {
-  "input_method": "both",
+  "input_method": "environment",
   "parameters": {
     "nimclient": {
       "description": "NIM client to be checked",

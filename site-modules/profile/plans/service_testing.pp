@@ -35,26 +35,27 @@ plan profile::service_testing (
 
     # repetitive loops as reduce() didn't want to create nested hash
     # service in pre-results but not in post-results
-    $pre_but_not_post = $pre_result['service'].filter | $pre_service_name, $pre_service_values | {
+    $missing_post_patch = $pre_result['service'].filter | $pre_service_name, $pre_service_values | {
       ! $pre_service_name in $post_result['service'].keys()
     }
     # service in post-results but not in pre-results
-    $post_but_not_pre = $post_result['service'].filter | $post_service_name, $post_service_values | {
+    $new_post_patch = $post_result['service'].filter | $post_service_name, $post_service_values | {
       ! $post_service_name in $pre_result['service'].keys()
     }
     # use post_result for changed_services so it will display current (post-patch) state
-    $changed_services = $post_result['service'].filter | $post_service_name, $post_service_values | {
+    $changed_post_patch = $post_result['service'].filter | $post_service_name, $post_service_values | {
       if $post_service_name in $pre_result['service'].keys() {
         # ensure (running/stopped) is not in the same state as prior to patching
-        $pre_result['service'][$post_service_name]['ensure'] != $post_result['service'][$post_service_name]['ensure']
+        $post_result['service'][$post_service_name]['ensure'] != $pre_result['service'][$post_service_name]['ensure']
       }
     }
+    out::message("changed services: ${changed_post_patch}")
     # if any of these are non-empty, add to results (if all are empty this means no changes)
-    unless ( $changed_services.empty and $pre_but_not_post.empty and $post_but_not_pre.empty ) {
+    unless ( $changed_post_patch.empty and $missing_post_patch.empty and $new_post_patch.empty ) {
       $memo + { $target_name => {
-                  'changed_status'    => $changed_services,
-                  'absent_post_patch' => $pre_but_not_post,
-                  'new_post_patch'    => $post_but_not_pre,
+                  'changed_post_patch' => $changed_post_patch,
+                  'absent_post_patch'  => $missing_post_patch,
+                  'new_post_patch'     => $new_post_patch,
                 }
               }
     }
@@ -64,6 +65,8 @@ plan profile::service_testing (
   $example_services.each | $service_name | {
     run_task('service', $targets, name => $service_name, action => 'start')
   }
+
+  $service_results = ResultSet($service_changes)
 
   if service_changes.empty {
     out::message($service_changes)

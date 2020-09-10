@@ -3,12 +3,25 @@
 # @param nimserver NIM server to use for patching
 # @param nimclients NIM clients to be patched
 # @param reconnect_timeout How long (in seconds) to attempt to reconnect after reboot before giving up. Defaults to 600.
+# @param perform_reboot Whether to perform reboot or just print message. Defaults to true.
+# @param dry_run Currently unused; could be used to determine whether to actually run. Defaults to false.
 #
 plan profile::aix_patch_workflow (
   TargetSpec $nimserver,
   TargetSpec $nimclients,
   Integer[0] $reconnect_timeout = 600,
+  Boolean    $perform_reboot = true,
+  Boolean    $dry_run = false,
 ) {
+
+  # Only pass one NIM server, otherwise how will we know which server to use for which clients
+  if ( get_targets($nimserver).size != 1 ) {
+    fail_plan('Only one NIM server is permitted',
+      'bolt/aix_patch_workflow-failed', {
+        action     => 'plan/aix_patch_workflow',
+        result_set => $nimserver,
+    })
+  }
 
   # Collect facts
   run_plan(facts, targets => $nimserver)
@@ -41,7 +54,7 @@ plan profile::aix_patch_workflow (
   # eg: extract Target names to pass as parameter:
   #$nimclient_names = get_targets($nimclients).map | $n } { $n.name }
 
-  $nimserver_name = $aix_nimserver.name
+  $nimserver_name = get_target($aix_nimserver).name
 
   # Loop over each client (assumes the NIM server will operate on one client at a time)
   $aix_nimclients.each | $nimclient | {
@@ -62,8 +75,12 @@ plan profile::aix_patch_workflow (
     # install patches (triggered from the NIM server, passing client as parameter)
     run_task('profile::aix_install_patch_via_nim_placeholder', $nimserver, nimclient => $nimclient_name)
 
-    out::message("Reboot for ${nimclient_name}")
-    # Reboot the NIM client after patch installation
-    run_plan('reboot', targets => $nimclient, reconnect_timeout => $reconnect_timeout)
+    out::message("Reboot for ${nimclient_name} - perform_reboot is ${perform_reboot}")
+    if $perform_reboot and ( ! $dry_run ) {
+      # Reboot the NIM client after patch installation
+      run_plan('reboot', targets => $nimclient, reconnect_timeout => $reconnect_timeout)
+    } else {
+      out::message("Skipping reboot for ${nimclient_name} as perform_reboot ${perform_reboot} or dry_run ${dry_run} specified")
+    }
   }
 }

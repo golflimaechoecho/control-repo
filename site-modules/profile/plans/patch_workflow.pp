@@ -102,7 +102,7 @@ plan profile::patch_workflow (
       }
     }
     # only add when these are non-empty
-    if ( ! $changed_service.empty ) and ( ! $pre_but_not_post.empty ) and ( ! $post_but_not_pre.empty ) {
+    if ( ! $changed_services.empty ) and ( ! $pre_but_not_post.empty ) and ( ! $post_but_not_pre.empty ) {
       $memo + { $target_name => {
                   'changed_status'    => $changed_services,
                   'absent_post_patch' => $pre_but_not_post,

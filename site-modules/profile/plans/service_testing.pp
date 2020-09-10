@@ -42,10 +42,11 @@ plan profile::service_testing (
     $post_but_not_pre = $post_result['service'].filter | $post_service_name, $post_service_values | {
       ! $post_service_name in $pre_result['service'].keys()
     }
-    $changed_services = $pre_result['service'].filter | $pre_service_name, $pre_service_values | {
-      if $pre_service_name in $post_result['service'].keys() {
+    # use post_result for changed_services so it will display current (post-patch) state
+    $changed_services = $post_result['service'].filter | $post_service_name, $post_service_values | {
+      if $post_service_name in $pre_result['service'].keys() {
         # ensure (running/stopped) is not in the same state as prior to patching
-        $pre_result['service'][$pre_service_name]['ensure'] != $post_result['service'][$pre_service_name]['ensure']
+        $pre_result['service'][$post_service_name]['ensure'] != $post_result['service'][$post_service_name]['ensure']
       }
     }
     # if any of these are non-empty, add to results (if all are empty this means no changes)
@@ -65,7 +66,7 @@ plan profile::service_testing (
   }
 
   if service_changes.empty {
-    notice($service_changes)
+    out::message($service_changes)
   }
   return()
 }

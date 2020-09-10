@@ -44,11 +44,11 @@ plan profile::service_check (
     }
     $change_hash = $changed_services.reduce({}) | $svc_memo, $svc | {
       $pre_service_name = $svc[0]
-      if $svc in $post_result['service'].keys() {
-        $svc_memo + { ${pre_service_name} => "state changed, now $post_result['service'][$pre_service_name]['ensure']" }
-        out::message("${target_name} ${pre_service_name} state changed, now $post_result['service'][$pre_service_name]['ensure']")
+      if $pre_service_name in $post_result['service'].keys() {
+        $svc_memo + { $pre_service_name => "state changed, now ${post_result['service'][$pre_service_name]['ensure']}" }
+        out::message("${target_name} ${pre_service_name} state changed, now ${post_result['service'][$pre_service_name]['ensure']}")
       } else {
-        $svc_memo + { $pre_service_name => "no longer present" }
+        $svc_memo + { $pre_service_name => 'missing/no longer present' }
         out::message("${target_name} ${pre_service_name} no longer present")
       }
     }

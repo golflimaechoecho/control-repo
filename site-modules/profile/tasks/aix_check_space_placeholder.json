@@ -1,5 +1,5 @@
 {
-  "input_method": "stdin",
+  "input_method": "both",
   "parameters": {
     "filesystem": {
       "description": "filesystem to check for free space (defaults to /)",

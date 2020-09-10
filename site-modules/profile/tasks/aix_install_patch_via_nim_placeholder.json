@@ -1,5 +1,5 @@
 {
-  "input_method": "stdin",
+  "input_method": "both",
   "parameters": {
     "nimclient": {
       "description": "NIM client to be patched",

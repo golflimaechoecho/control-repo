@@ -42,19 +42,37 @@ plan profile::service_testing (
         # ensure (running/stopped) is not in the same state as prior to patching
         $pre_result['service'][$pre_service_name]['ensure'] != $post_result['service'][$pre_service_name]['ensure']
       } else {
-        # pre-service not in post-results
+        # service in pre-results but not in post-results
         true
       }
     }
-    # if there are any changes, this target belongs in $changed_results
     ! $service_changes.empty
   }
 
-  # changed_results is an array of results
-  if $changed_results.empty {
-    out::message('Changed results is empty')
+  $reduced_results = $services_before_patching.reduce({}) | $memo, $pre_result | {
+    $target_name = $pre_result.target().name()
+    $post_result = $services_after_patching.find($target_name)
+
+    $reduced_services = $pre_result['service'].filter | $svcmemo, $pre_service_hash | {
+      $pre_service_name = $pre_service_hash[0]
+      if $pre_service_name in $post_result['service'].keys() {
+        # ensure (running/stopped) is not in the same state as prior to patching
+        if $pre_result['service'][$pre_service_name]['ensure'] != $post_result['service'][$pre_service_name]['ensure'] {
+          $svcmemo + { $pre_service_name => "changed, now ${post_result['service'][$pre_service_name]['ensure']}" }
+        }
+      } else {
+        # service in pre-results but not in post-results
+        $svcmemo + { $pre_service_name => "missing from post_result" }
+      }
+    }
+    $memo + { $target_name => $reduced_services }
+  }
+
+  # reduced_services should be a hash
+  if $reduced_services.empty {
+    out::message('reduced_services is empty')
   } else {
-    out::message("Changed results has contents ${changed_results}")
+    out::message("reduced_services has contents ${changed_results}")
   }
 
   #

@@ -30,8 +30,8 @@ plan profile::aix_patch_workflow (
   # Check sufficient space before starting
   # This runs on individual clients
   out::message("Placeholder to check space")
-  run_task('profile::aix_check_space_placeholder', $nimserver)
-  run_task('profile::aix_check_space_placeholder', $nimclients)
+  run_task('profile::aix_check_space_placeholder', $nimserver, filesystem => '/')
+  run_task('profile::aix_check_space_placeholder', $nimclients, filesystem => '/')
 
   # If the NIM server can operate on multiple clients in parallel, the task(s)
   # being called could be written to pass a list of client names instead of

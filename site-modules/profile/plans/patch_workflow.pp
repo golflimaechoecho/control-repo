@@ -82,23 +82,39 @@ plan profile::patch_workflow (
   }
 
   # check if any services from before patching are not running
-  # this doesn't check for any new services (ie: that didn't exist prior to patching)
-  $changed_services = $services_before_patching.reduce | $memo, $pre_result | {
+  $service_changes = $services_before_patching.reduce({}) | $memo, $pre_result | {
     $target_name = $pre_result.target().name()
     $post_result = $services_after_patching.find($target_name)
-    $pre_result['service'].keys.each | $pre_service_name | {
-      if $pre_service_name in $post_result['service'].keys() {
-        if $pre_result['service'][$pre_service_name]['ensure'] != $post_result['service'][$pre_service_name]['ensure'] {
-          # ensure (running/stopped) is not in the same state as prior to patching
-          $memo + { $target_name => { $pre_service_name => "state changed, now ${post_result['service'][$pre_service_name]['ensure']}" } }
 
-        }
-      } else {
-        # service missing from post_result
-        $memo + { $target_name => { $pre_service_name => "no longer present" } }
+    # repetitive loops as reduce() didn't want to create nested hash
+    # service in pre-results but not in post-results
+    $pre_but_not_post = $pre_result['service'].filter | $pre_service_name, $pre_service_values | {
+      ! $pre_service_name in $post_result['service'].keys()
+    }
+    # service in post-results but not in pre-results
+    $post_but_not_pre = $post_result['service'].filter | $post_service_name, $post_service_values | {
+      ! $post_service_name in $pre_result['service'].keys()
+    }
+    $changed_services = $pre_result['service'].filter | $pre_service_name, $pre_service_values | {
+      if $pre_service_name in $post_result['service'].keys() {
+        # ensure (running/stopped) is not in the same state as prior to patching
+        $pre_result['service'][$pre_service_name]['ensure'] != $post_result['service'][$pre_service_name]['ensure']
       }
+    }
+    # only add when these are non-empty
+    if ( ! $changed_service.empty ) and ( ! $pre_but_not_post.empty ) and ( ! $post_but_not_pre.empty ) {
+      $memo + { $target_name => {
+                  'changed_status'    => $changed_services,
+                  'absent_post_patch' => $pre_but_not_post,
+                  'new_post_patch'    => $post_but_not_pre,
+                }
+              }
     }
   }
 
-  return $patch_result
+  if service_changes.empty {
+    return()
+  } else {
+    return $service_changes
+  }
 }

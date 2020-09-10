@@ -29,6 +29,7 @@ plan profile::aix_patch_workflow (
 
   # Check sufficient space before starting
   # This runs on individual clients
+  out::message("Placeholder to check space")
   run_task('profile::aix_check_space_placeholder', $nimserver)
   run_task('profile::aix_check_space_placeholder', $nimclients)
 
@@ -38,6 +39,8 @@ plan profile::aix_patch_workflow (
   # eg: extract Target names to pass as parameter:
   #$nimclient_names = get_targets($nimclients).map | $n } { $n.name }
 
+  $nimserver_name = $nimserver.name
+
   # Loop over each client (assumes the NIM server will operate on one client at a time)
   $nimclients.each | $nimclient | {
     # Assumes NIM server can parse client names in same format as TargetSpec (eg: certname/fqdn)
@@ -45,15 +48,19 @@ plan profile::aix_patch_workflow (
     # https://puppet.com/docs/bolt/latest/bolt_types_reference.html#target
     $nimclient_name = $nimclient.name
 
+    out::message("Placeholder connectivity check on ${nimserver_name} for ${nimclient_name}")
     # Check NIM server can connect to the client (triggered from NIM server, passing client as parameter)
     run_task('profile::aix_nim_connectivity_placeholder', $nimserver, nimclient => $nimclient_name)
 
+    out::message("Placeholder mksysb on ${nimserver_name} for ${nimclient_name}")
     # Perform mksysb (triggered from NIM server, passing client as parameter)
     run_task('profile::aix_mksysb_via_nim_placeholder', $nimserver, nimclient => $nimclient_name)
 
+    out::message("Placeholder patch install on ${nimserver_name} for ${nimclient_name}")
     # install patches (triggered from the NIM server, passing client as parameter)
     run_task('profile::aix_install_patch_via_nim_placeholder', $nimserver, nimclient => $nimclient_name)
 
+    out::message("Reboot for ${nimclient_name}")
     # Reboot the NIM client after patch installation
     run_plan('reboot', targets => $nimclient, reconnect_timeout => $reconnect_timeout)
   }

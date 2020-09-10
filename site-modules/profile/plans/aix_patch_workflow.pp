@@ -20,18 +20,20 @@ plan profile::aix_patch_workflow (
     #$nsrv.facts['os']['name'] == 'AIX' and $nsrv.trusted['extensions']['pp_role'] == 'nimserver'
 
     # for now just check it's AIX
-    $nsrv.facts['os']['name'] == 'AIX'
+    #$nsrv.facts['os']['name'] == 'AIX'
+    true
   }
 
   $aix_nimclients = get_targets($nimclients).filter | $nimclient | {
-    $nimclient.facts['os']['name'] == 'AIX'
+    #$nimclient.facts['os']['name'] == 'AIX'
+    true
   }
 
   # Check sufficient space before starting
   # This runs on individual clients
   out::message("Placeholder to check space")
-  run_task('profile::aix_check_space_placeholder', $nimserver, filesystem => '/')
-  run_task('profile::aix_check_space_placeholder', $nimclients, filesystem => '/')
+  run_task('profile::aix_check_space_placeholder', $aix_nimserver, filesystem => '/')
+  run_task('profile::aix_check_space_placeholder', $aix_nimclients, filesystem => '/')
 
   # If the NIM server can operate on multiple clients in parallel, the task(s)
   # being called could be written to pass a list of client names instead of
@@ -39,14 +41,14 @@ plan profile::aix_patch_workflow (
   # eg: extract Target names to pass as parameter:
   #$nimclient_names = get_targets($nimclients).map | $n } { $n.name }
 
-  $nimserver_name = get_target($nimserver).name
+  $nimserver_name = $aix_nimserver.name
 
   # Loop over each client (assumes the NIM server will operate on one client at a time)
-  $nimclients.each | $nimclient | {
+  $aix_nimclients.each | $nimclient | {
     # Assumes NIM server can parse client names in same format as TargetSpec (eg: certname/fqdn)
     # eg: could possibly use .host rather than .name depending on NIM requirements
     # https://puppet.com/docs/bolt/latest/bolt_types_reference.html#target
-    $nimclient_name = get_target($nimclient).name
+    $nimclient_name = $nimclient.name
 
     out::message("Placeholder connectivity check on ${nimserver_name} for ${nimclient_name}")
     # Check NIM server can connect to the client (triggered from NIM server, passing client as parameter)

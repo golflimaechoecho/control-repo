@@ -51,8 +51,8 @@ plan profile::service_check (
         $svc_memo + { $pre_service_name => "no longer present" }
         out::message("${target_name} ${pre_service_name} no longer present")
       }
-      $memo + { $target_name => $change_hash }
     }
+    $memo + { $target_name => $change_hash }
   }
 
   # start these again

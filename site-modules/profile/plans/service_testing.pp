@@ -59,11 +59,11 @@ plan profile::service_testing (
         # ensure (running/stopped) is not in the same state as prior to patching
         if ( $pre_result['service'][$pre_service_name]['ensure'] != $post_result['service'][$pre_service_name]['ensure'] ) {
           out::message("${target_name} ${pre_service_name} state changed, now ${post_result['service'][$pre_service_name]['ensure']}")
-          $svcmemo + { $pre_service_name => 'changed' }
+          $svcmemo + { $pre_service_hash[0] => 'changed' }
         }
       } else {
         # service in pre-results but not in post-results
-        $svcmemo + { $pre_service_name => 'missing' }
+        $svcmemo + { $pre_service_hash[0] => 'missing' }
       }
     }
     out::message("reduced_services is ${reduced_services}")

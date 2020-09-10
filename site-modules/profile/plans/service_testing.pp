@@ -68,11 +68,11 @@ plan profile::service_testing (
     $memo + { $target_name => $reduced_services }
   }
 
-  # reduced_services should be a hash
-  if $reduced_services.empty {
-    out::message('reduced_services is empty')
+  # reduced_results should be a hash
+  if $reduced_results.empty {
+    out::message('reduced_results is empty')
   } else {
-    out::message("reduced_services has contents ${changed_results}")
+    out::message("reduced_results has contents ${reduced_results}")
   }
 
   #

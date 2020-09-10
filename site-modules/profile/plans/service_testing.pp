@@ -51,6 +51,11 @@ plan profile::service_testing (
   }
 
   # changed_results is an array of results
+  if $changed_results.empty {
+    out::message('Changed results is empty')
+  } else {
+    out::message("Changed results has contents ${changed_results}")
+  }
 
   #
   #    $change_hash = $changed_services.reduce({}) | $svc_memo, $svc | {

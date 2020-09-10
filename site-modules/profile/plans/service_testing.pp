@@ -6,8 +6,9 @@
 # @param lock_retry_interval How long (in seconds) to wait between retries. Defaults to 5.
 # @param fail_plan_on_errors Raise an error if any targets do not successfully unlock. Defaults to true.
 #
-plan profile::service_check (
+plan profile::service_testing (
   TargetSpec $targets,
+  Array[String] $example_services = ['puppet'],
   Integer[0] $reconnect_timeout = 180,
   Integer[0] $lock_check_timeout = 600,
   Integer[0] $lock_retry_interval = 5,
@@ -18,9 +19,10 @@ plan profile::service_check (
     run_task('profile::check_services', $targets)
   }
 
-  # stop puppet and SplunkForwarder as example
-  run_task('service', $targets, name => 'puppet', action => 'stop')
-  run_task('service', $targets, name => 'SplunkForwarder', action => 'stop')
+  # stop services as an example
+  $example_services.each | $service_name | {
+    run_task('service', $targets, name => $service_name, action => 'stop')
+  }
 
   $services_after_patching = without_default_logging() || {
     run_task('profile::check_services', $targets)
@@ -31,17 +33,17 @@ plan profile::service_check (
   $changed_results = $services_before_patching.reduce({}) | $memo, $pre_result | {
     $target_name = $pre_result.target().name()
     $post_result = $services_after_patching.find($target_name)
+
     # filter hash for services that have changed
     $changed_services = $pre_result['service'].filter | $pre_service_name, $pre_service_values | {
       if $pre_service_name in $post_result['service'].keys() {
         # ensure (running/stopped) is not in the same state as prior to patching
         $pre_result['service'][$pre_service_name]['ensure'] != $post_result['service'][$pre_service_name]['ensure']
-
       } else {
-        # service missing from post_result
         true
       }
     }
+
     $change_hash = $changed_services.reduce({}) | $svc_memo, $svc | {
       $pre_service_name = $svc[0]
       if $pre_service_name in $post_result['service'].keys() {
@@ -55,9 +57,10 @@ plan profile::service_check (
     $memo + { $target_name => $change_hash }
   }
 
-  # start these again
-  run_task('service', $targets, name => 'puppet', action => 'start')
-  run_task('service', $targets, name => 'SplunkForwarder', action => 'start')
+  # start example services again
+  $example_services.each | $service_name | {
+    run_task('service', $targets, name => $service_name, action => 'stop')
+  }
 
   return $changed_results
 }

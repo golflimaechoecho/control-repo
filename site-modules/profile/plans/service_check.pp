@@ -28,21 +28,30 @@ plan profile::service_check (
 
   # check if any services from before patching are not running
   # this doesn't check for any new services (ie: that didn't exist prior to patching)
-  $changed_services = $services_before_patching.reduce({}) | $memo, $pre_result | {
+  $changed_results = $services_before_patching.reduce({}) | $memo, $pre_result | {
     $target_name = $pre_result.target().name()
     $post_result = $services_after_patching.find($target_name)
-    $pre_result['service'].keys.each | $pre_service_name | {
+    # filter hash for services that have changed
+    $changed_services = $pre_result['service'].filter | $pre_service_name, $pre_service_values | {
       if $pre_service_name in $post_result['service'].keys() {
-        if $pre_result['service'][$pre_service_name]['ensure'] != $post_result['service'][$pre_service_name]['ensure'] {
-          # ensure (running/stopped) is not in the same state as prior to patching
-          out::message("${target_name}: ${pre_service_name} state changed, now ${post_result['service'][$pre_service_name]['ensure']}")
-          $memo + { $target_name => { $pre_service_name => "state changed, now ${post_result['service'][$pre_service_name]['ensure']}" } }
-        }
+        # ensure (running/stopped) is not in the same state as prior to patching
+        $pre_result['service'][$pre_service_name]['ensure'] != $post_result['service'][$pre_service_name]['ensure']
+
       } else {
         # service missing from post_result
-        out::message("${target_name} ${pre_service_name} no longer present")
-        $memo + { $target_name => { $pre_service_name => "no longer present" } }
+        true
       }
+    }
+    $change_hash = $changed_services.reduce({}) | $svc_memo, $svc | {
+      $pre_service_name = $svc[0]
+      if $svc in $post_result['service'].keys() {
+        $svc_memo + { ${pre_service_name} => "state changed, now $post_result['service'][$pre_service_name]['ensure']" }
+        out::message("${target_name} ${pre_service_name} state changed, now $post_result['service'][$pre_service_name]['ensure']")
+      } else {
+        $svc_memo + { $pre_service_name => "no longer present" }
+        out::message("${target_name} ${pre_service_name} no longer present")
+      }
+      $memo + { $target_name => $change_hash }
     }
   }
 
@@ -50,5 +59,5 @@ plan profile::service_check (
   run_task('service', $targets, name => 'puppet', action => 'start')
   run_task('service', $targets, name => 'SplunkForwarder', action => 'start')
 
-  return $changed_services
+  return $changed_results
 }

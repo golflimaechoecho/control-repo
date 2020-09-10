@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/sh
 # Placeholder: Check space on AIX
 # For demonstration, default to check for minimum 1GB (1048576KB) free under /
 MINSPACE=${PT_minspace:-1048576}

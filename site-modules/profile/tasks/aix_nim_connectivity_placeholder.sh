@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/sh
 # Placeholder: run on the NIM server to check connectivity to specified NIM client
 NIMCLIENT=${PT_nimclient:?"ERROR: NIM client is required"}
 

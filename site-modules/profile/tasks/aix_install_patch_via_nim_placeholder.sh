@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/sh
 # Placeholder: run on the NIM server to install patches on specified NIM client
 # Additional parameters (eg: patch name/reference to install) can be added as
 # parameters to task json and passed here as well (as PT_parameter)

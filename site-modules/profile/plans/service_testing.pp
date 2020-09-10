@@ -31,25 +31,7 @@ plan profile::service_testing (
   # check if any services from before patching are not running
   # this doesn't check for any new services (ie: that didn't exist prior to patching)
 
-  # changed_results = an array of any results that have changed
-  $changed_results = $services_before_patching.filter | $pre_result | {
-    $target_name = $pre_result.target().name()
-    $post_result = $services_after_patching.find($target_name)
-
-    # filter hash for services that have changed
-    $service_changes = $pre_result['service'].filter | $pre_service_name, $pre_service_values | {
-      if $pre_service_name in $post_result['service'].keys() {
-        # ensure (running/stopped) is not in the same state as prior to patching
-        $pre_result['service'][$pre_service_name]['ensure'] != $post_result['service'][$pre_service_name]['ensure']
-      } else {
-        # service in pre-results but not in post-results
-        true
-      }
-    }
-    ! $service_changes.empty
-  }
-
-  $reduced_results = $services_before_patching.reduce({}) | $memo, $pre_result | {
+  $service_changes = $services_before_patching.reduce({}) | $memo, $pre_result | {
     $target_name = $pre_result.target().name()
     $post_result = $services_after_patching.find($target_name)
 
@@ -69,39 +51,23 @@ plan profile::service_testing (
       }
     }
     $memo + { $target_name => {
-                'changed' => $changed_services,
-                'missing' => $pre_but_not_post,
-                'newlystarted' => $post_but_not_pre,
+                'changed_status'    => $changed_services,
+                'absent_post_patch' => $pre_but_not_post,
+                'new_post_patch'    => $post_but_not_pre,
               }
             }
   }
 
-  # reduced_results should be a hash
-  if $reduced_results.empty {
-    out::message('reduced_results is empty')
+  if $service_changes.empty {
+    out::message('service_changes is empty')
   } else {
-    out::message("reduced_results has contents ${reduced_results}")
+    out::message("service_changes has contents ${service_changes}")
   }
-
-
-  #    $change_hash = $changed_services.reduce({}) | $svc_memo, $svc | {
-  #      $pre_service_name = $svc[0]
-  #      if $pre_service_name in $post_result['service'].keys() {
-  #        $svc_memo + { $pre_service_name => "state changed, now $post_result['service'][$pre_service_name]['ensure']" }
-  #        out::message("${target_name} ${pre_service_name} state changed, now ${post_result['service'][$pre_service_name]['ensure']}")
-  #      } else {
-  #        $svc_memo + { $pre_service_name => 'no longer present' }
-  #        out::message("${target_name} ${pre_service_name} no longer present")
-  #      }
-  #    }
-  #    $memo + { $target_name => $change_hash }
-  #  }
-  #
 
   # start example services again
   $example_services.each | $service_name | {
     run_task('service', $targets, name => $service_name, action => 'start')
   }
 
-  return $changed_results
+  return $service_changes
 }

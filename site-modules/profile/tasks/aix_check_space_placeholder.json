@@ -1,0 +1,16 @@
+{
+  "input_method": "stdin",
+  "parameters": {
+    "filesystem": {
+      "description": "filesystem to check for free space (defaults to /)",
+      "type": "Optional[Pattern[/^\/([a-zA-Z0-9-_]+)?$/]]"
+    },
+    "minspace": {
+      "description": "Minimum space requirement (in 1K blocks) to check for (defaults to 1048576 [1GB])",
+      "type": "Optional[Integer]"
+    }
+  },
+  "puppet_task_version": 1,
+  "supports_noop": false,
+  "description": "Placeholder: Check sufficient space for patching on AIX"
+}

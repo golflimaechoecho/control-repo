@@ -1,0 +1,12 @@
+{
+  "input_method": "stdin",
+  "parameters": {
+    "nimclient": {
+      "description": "NIM client to be checked",
+      "type": "String[1]"
+    }
+  },
+  "puppet_task_version": 1,
+  "supports_noop": false,
+  "description": "Placeholder: Run on the NIM server confirm it can connect to specified NIM client"
+}

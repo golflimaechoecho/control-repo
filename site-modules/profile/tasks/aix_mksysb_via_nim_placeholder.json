@@ -1,0 +1,12 @@
+{
+  "input_method": "stdin",
+  "parameters": {
+    "nimclient": {
+      "description": "NIM client to be mksysb-ed/backed up",
+      "type": "String[1]"
+    }
+  },
+  "puppet_task_version": 1,
+  "supports_noop": false,
+  "description": "Placeholder: Run on the NIM server to create mksysb backup for specified NIM client"
+}

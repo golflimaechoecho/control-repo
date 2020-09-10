@@ -65,8 +65,7 @@ plan profile::service_testing (
   }
 
   if service_changes.empty {
-    return()
-  } else {
-    return $service_changes
+    notice($service_changes)
   }
+  return()
 }

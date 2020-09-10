@@ -83,4 +83,6 @@ plan profile::aix_patch_workflow (
       out::message("Skipping reboot for ${nimclient_name} as perform_reboot ${perform_reboot} or dry_run ${dry_run} specified")
     }
   }
+
+  return()
 }

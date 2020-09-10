@@ -74,7 +74,7 @@ plan profile::service_testing (
 
   # start example services again
   $example_services.each | $service_name | {
-    run_task('service', $targets, name => $service_name, action => 'stop')
+    run_task('service', $targets, name => $service_name, action => 'start')
   }
 
   return $changed_results

@@ -53,28 +53,24 @@ plan profile::service_testing (
     $target_name = $pre_result.target().name()
     $post_result = $services_after_patching.find($target_name)
 
-    $reduced_services = $pre_result['service'].reduce({ 'changed' => []}) | $svcmemo, $pre_service_hash | {
+    $reduced_services = $pre_result['service'].reduce({}) | $svcmemo, $pre_service_hash | {
       $pre_service_name = $pre_service_hash[0]
-      #out::message($pre_service_name)
       if $pre_service_name in $post_result['service'].keys() {
+        out::message($pre_service_name)
         # ensure (running/stopped) is not in the same state as prior to patching
         if ( $pre_result['service'][$pre_service_name]['ensure'] != $post_result['service'][$pre_service_name]['ensure'] ) {
           out::message("${target_name} ${pre_service_name} state changed, now ${post_result['service'][$pre_service_name]['ensure']}")
-          ({
-            'changed' => $svcmemo['changed'] + { $pre_service_name => "now ${post_result['service'][$pre_service_name]['ensure']}" }
-          })
+          $svcmemo + { $pre_service_name => [ 'changed', "${post_result['service'][$pre_service_name]['ensure']}" ] }
+          }
 
         }
       } else {
         # service in pre-results but not in post-results
-        ({
-          'changed' => $svcmemo['changed'] + { $pre_service_name => "missing from post_result" }
-        })
+        $svcmemo + { $pre_service_name => [ 'missing' ] }
       }
     }
-    if ! $reduced_services['changed'].empty {
-      $memo + { $target_name => $reduced_services }
-    }
+    out::message("reduced_services is ${reduced_services}")
+    $memo + { $target_name => $reduced_services }
   }
 
   # reduced_results should be a hash

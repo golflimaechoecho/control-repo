@@ -67,8 +67,8 @@ plan profile::service_testing (
         # service in pre-results but not in post-results
         $svcmemo + { $pre_service_name => "missing from post_result" }
       }
-      out::message($reduced_services)
     }
+    out::message($reduced_services)
     $memo + { $target_name => $reduced_services }
   }
 

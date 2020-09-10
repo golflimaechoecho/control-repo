@@ -101,8 +101,8 @@ plan profile::patch_workflow (
         $pre_result['service'][$pre_service_name]['ensure'] != $post_result['service'][$pre_service_name]['ensure']
       }
     }
-    # only add when these are non-empty
-    if ( ! $changed_services.empty ) and ( ! $pre_but_not_post.empty ) and ( ! $post_but_not_pre.empty ) {
+    # if any of these are non-empty, add to results (if all are empty this means no changes)
+    unless ( $changed_services.empty and $pre_but_not_post.empty and $post_but_not_pre.empty ) {
       $memo + { $target_name => {
                   'changed_status'    => $changed_services,
                   'absent_post_patch' => $pre_but_not_post,

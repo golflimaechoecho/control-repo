@@ -79,5 +79,5 @@ plan profile::service_testing (
     run_task('service', $targets, name => $service_name, action => 'stop')
   }
 
-  #return $changed_results
+  return $changed_results
 }

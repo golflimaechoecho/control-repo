@@ -10,6 +10,10 @@ plan profile::aix_patch_workflow (
   Integer[0] $reconnect_timeout = 600,
 ) {
 
+  # Collect facts
+  run_plan(facts, targets => $nimserver)
+  run_plan(facts, targets => $nimclients)
+
   # Filter AIX targets only
   $aix_nimserver = get_targets($nimserver).filter | $nsrv | {
     # If there is a fact/role to indicate it is a NIM server, could also check here eg:

@@ -55,7 +55,7 @@ plan profile::service_testing (
 
     $reduced_services = $pre_result['service'].reduce({}) | $svcmemo, $pre_service_hash | {
       $pre_service_name = $pre_service_hash[0]
-      out::message("$pre_service_name")
+      out::message($pre_service_name)
       if $pre_service_name in $post_result['service'].keys() {
         # ensure (running/stopped) is not in the same state as prior to patching
         if $pre_result['service'][$pre_service_name]['ensure'] != $post_result['service'][$pre_service_name]['ensure'] {
@@ -68,7 +68,6 @@ plan profile::service_testing (
         $svcmemo + { $pre_service_name => "missing from post_result" }
         out::message("${target_name} ${pre_service_name} no longer present")
       }
-      out::message("svcmemo contents: ${svcmemo}")
     }
     $memo + { $target_name => $reduced_services }
   }

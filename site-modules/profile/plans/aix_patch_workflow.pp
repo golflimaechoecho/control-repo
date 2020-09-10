@@ -39,14 +39,14 @@ plan profile::aix_patch_workflow (
   # eg: extract Target names to pass as parameter:
   #$nimclient_names = get_targets($nimclients).map | $n } { $n.name }
 
-  $nimserver_name = $nimserver.name
+  $nimserver_name = get_target($nimserver).name
 
   # Loop over each client (assumes the NIM server will operate on one client at a time)
   $nimclients.each | $nimclient | {
     # Assumes NIM server can parse client names in same format as TargetSpec (eg: certname/fqdn)
     # eg: could possibly use .host rather than .name depending on NIM requirements
     # https://puppet.com/docs/bolt/latest/bolt_types_reference.html#target
-    $nimclient_name = $nimclient.name
+    $nimclient_name = get_target($nimclient).name
 
     out::message("Placeholder connectivity check on ${nimserver_name} for ${nimclient_name}")
     # Check NIM server can connect to the client (triggered from NIM server, passing client as parameter)

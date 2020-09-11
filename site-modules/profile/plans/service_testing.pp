@@ -66,12 +66,12 @@ plan profile::service_testing (
   }
 
   # hash of changes to return
-  $changes = {}
-
-  # for now add service_changes if not empty
+  # for now set to service_changes if not empty
   # potentially add package, other checks that are added
   if ! service_changes.empty {
-    $changes = $changes + { 'service_changes' => $service_changes }
+    $changes = { 'service_changes' => $service_changes }
+  } else {
+    $changes = {}
   }
 
   if ! changes.empty {

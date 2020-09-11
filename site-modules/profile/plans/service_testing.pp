@@ -29,7 +29,7 @@ plan profile::service_testing (
   }
 
   # check if any services from before patching are not running
-  $service_changes = $services_before_patching.reduce([]) | $memo, $pre_result | {
+  $service_changes = $services_before_patching.reduce({}) | $memo, $pre_result | {
     $target_name = $pre_result.target().name()
     $post_result = $services_after_patching.find($target_name)
 
@@ -66,11 +66,10 @@ plan profile::service_testing (
     run_task('service', $targets, name => $service_name, action => 'start')
   }
 
-  if service_changes.empty {
+  # only output service_changes if it is not empty
+  if ! service_changes.empty {
     out::message($service_changes)
   }
-
-  $service_results = ResultSet($service_changes)
 
   return()
 }

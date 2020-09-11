@@ -64,7 +64,7 @@ plan profile::aix_patch_workflow (
     # Assumes NIM server can parse client names in same format as TargetSpec (eg: certname/fqdn)
     # eg: could possibly use .host rather than .name depending on NIM requirements
     # https://puppet.com/docs/bolt/latest/bolt_types_reference.html#target
-    $nimclient_name = $nimclient.host
+    $nimclient_name = $nimclient.name
 
     out::message("Placeholder connectivity check on ${nimserver_name} for ${nimclient_name}")
     # Check NIM server can connect to the client (triggered from NIM server, passing client as parameter)

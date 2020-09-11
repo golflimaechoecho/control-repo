@@ -5,8 +5,12 @@
       "description": "NIM client to be mksysb-ed/backed up",
       "type": "String[1]"
     },
-    "location": {
-      "description": "Location/path to write backup",
+    "mksysb_location": {
+      "description": "Location/path to write mksysb",
+      "type": "Pattern[/\A\/([^\n\/\0]+\/*)*\z/]"
+    },
+    "spot_location": {
+      "description": "Location/path to write spot",
       "type": "Pattern[/\A\/([^\n\/\0]+\/*)*\z/]"
     }
   },

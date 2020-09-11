@@ -13,6 +13,7 @@ plan profile::aix_patch_workflow (
   Boolean    $perform_reboot = true,
   Boolean    $dry_run = false,
   Stdlib::Absolutepath $mksysb_location = '/export/nim/mksysb',
+  Stdlib::Absolutepath $spot_location = '/export/nim/spot',
 ) {
 
   # Only pass one NIM server, otherwise how will we know which server to use for which clients
@@ -71,7 +72,7 @@ plan profile::aix_patch_workflow (
 
     out::message("Placeholder mksysb on ${nimserver_name} for ${nimclient_name}")
     # Perform mksysb (triggered from NIM server, passing client as parameter)
-    run_task('profile::aix_mksysb_via_nim_placeholder', $nimserver, nimclient => $nimclient_name, location => $mksysb_location, '_catch_errors' => true)
+    run_task('profile::aix_mksysb_via_nim_placeholder', $nimserver, nimclient => $nimclient_name, mksysb_location => $mksysb_location, spot_location => $spot_location, '_catch_errors' => true)
 
     out::message("Placeholder patch install on ${nimserver_name} for ${nimclient_name}")
     # install patches (triggered from the NIM server, passing client as parameter)

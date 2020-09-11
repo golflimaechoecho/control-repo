@@ -49,7 +49,6 @@ plan profile::service_testing (
         $post_result['service'][$post_service_name]['ensure'] != $pre_result['service'][$post_service_name]['ensure']
       }
     }
-    out::message("changed services: ${changed_post_patch}")
     # if any of these are non-empty, add to results (if all are empty this means no changes)
     unless ( $changed_post_patch.empty and $missing_post_patch.empty and $new_post_patch.empty ) {
       $memo + { $target_name => {
@@ -68,7 +67,7 @@ plan profile::service_testing (
 
   # only output service_changes if it is not empty
   if ! service_changes.empty {
-    out::message($service_changes)
+    out::message("service changes: ${service_changes}")
   }
 
   return()

@@ -4,6 +4,10 @@
     "nimclient": {
       "description": "NIM client to be mksysb-ed/backed up",
       "type": "String[1]"
+    },
+    "location": {
+      "description": "Location/path to write backup",
+      "type": "Pattern[/\A\/([^\n\/\0]+\/*)*\z/]"
     }
   },
   "puppet_task_version": 1,

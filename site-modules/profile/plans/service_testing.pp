@@ -65,10 +65,18 @@ plan profile::service_testing (
     run_task('service', $targets, name => $service_name, action => 'start')
   }
 
-  # only output service_changes if it is not empty
+  # hash of changes to return
+  $changes = {}
+
+  # for now add service_changes if not empty
+  # potentially add package, other checks that are added
   if ! service_changes.empty {
-    out::message("service changes: ${service_changes}")
+    $changes = $changes + { 'service_changes' => $service_changes }
   }
 
-  return()
+  if ! changes.empty {
+    return($changes)
+  } else {
+    return()
+  }
 }

@@ -10,17 +10,9 @@ plan profile::windows_tidy_c_tmpfiles (
   # https://puppet.com/docs/puppet/6.18/types/tidy.html
   # to use matches, recurse must be non-zero/non-false.
   # specify recurse = 1 to not descend into subdirectories
-  if ! $recurse {
-    $recurse_real = 1
-  } else {
-    $recurse_real = $recurse
-  }
-
-  $results = apply($targets) {
-    tidy { 'c_tmpfiles':
-      path    => 'C:\\',
-      matches => [ '*.tmp' ],
-      recurse => $recurse_real,
+  $results = apply($targets, '_noop' => $noop) {
+    class { 'profile::windows_tidy_c_tmpfiles':
+      recurse => $recurse,
     }
   }
 

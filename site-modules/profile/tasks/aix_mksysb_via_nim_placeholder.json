@@ -7,11 +7,11 @@
     },
     "mksysb_location": {
       "description": "Location/path to write mksysb",
-      "type": "Pattern[/\A\/([^\n\/\0]+\/*)*\z/]"
+      "type": "Pattern[/\\A\\/([^\\n\\/\\0]+\\/*)*\\z/]"
     },
     "spot_location": {
       "description": "Location/path to write spot",
-      "type": "Pattern[/\A\/([^\n\/\0]+\/*)*\z/]"
+      "type": "Pattern[/\\A\\/([^\\n\\/\\0]+\\/*)*\\z/]"
     }
   },
   "puppet_task_version": 1,

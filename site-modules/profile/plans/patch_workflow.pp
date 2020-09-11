@@ -31,6 +31,8 @@
 # @param lock_check_timeout How long (in seconds) to attempt to recheck before giving up. Defaults to 600.
 # @param lock_retry_interval How long (in seconds) to wait between retries. Defaults to 5.
 # @param fail_plan_on_errors Raise an error if any targets do not successfully unlock. Defaults to true.
+# @param perform_reboot Whether to perform reboot or just print message (NOTE: this determines pre-patch reboot behaviour only; pe_patch may still initiate reboot depending on configuration). Defaults to true.
+# @param dry_run Currently unused; could be used to determine whether to actually run. Defaults to false.
 #
 plan profile::patch_workflow (
   TargetSpec $targets,
@@ -44,6 +46,8 @@ plan profile::patch_workflow (
   Integer[0] $lock_check_timeout = 600,
   Integer[0] $lock_retry_interval = 5,
   Boolean    $fail_plan_on_errors = true,
+  Boolean    $perform_reboot = true,
+  Boolean    $dry_run = false,
 ) {
 
   $services_before_patching = without_default_logging() || {
@@ -69,13 +73,21 @@ plan profile::patch_workflow (
   #                                      vsphere_insecure     => $vsphere_insecure
   #)
 
-  run_plan('reboot', targets => $targets, reconnect_timeout => $reconnect_timeout)
+  if $perform_reboot and ( ! $dry_run ) {
+    run_plan('reboot', targets => $targets, reconnect_timeout => $reconnect_timeout)
+  } else {
+    out::message("Skipping reboot as perform_reboot false or dry_run ${dry_run} specified")
+  }
 
   # insert additional delay/sleep before running pe_patch, as pe_patch fact
   # generation runs on boot and can end up locking itself out
   run_plan('profile::pe_patch_lock_check', targets => $targets, lock_check_timeout => $lock_check_timeout)
 
-  $patch_result = run_task('pe_patch::patch_server', $targets, reboot => 'patched')
+  if $dry_run {
+    out::message("dry_run ${dry_run}: otherwise pe_patch::patch_server would be run here")
+  } else {
+    $patch_result = run_task('pe_patch::patch_server', $targets, reboot => 'patched')
+  }
 
   $services_after_patching = without_default_logging() || {
     run_task('profile::check_services', $targets)
@@ -88,33 +100,43 @@ plan profile::patch_workflow (
 
     # repetitive loops as reduce() didn't want to create nested hash
     # service in pre-results but not in post-results
-    $pre_but_not_post = $pre_result['service'].filter | $pre_service_name, $pre_service_values | {
+    $missing_post_patch = $pre_result['service'].filter | $pre_service_name, $pre_service_values | {
       ! $pre_service_name in $post_result['service'].keys()
     }
     # service in post-results but not in pre-results
-    $post_but_not_pre = $post_result['service'].filter | $post_service_name, $post_service_values | {
+    $new_post_patch = $post_result['service'].filter | $post_service_name, $post_service_values | {
       ! $post_service_name in $pre_result['service'].keys()
     }
     # use post_result for changed_services so it will display current (post-patch) state
-    $changed_services = $post_result['service'].filter | $post_service_name, $post_service_values | {
+    $changed_post_patch = $post_result['service'].filter | $post_service_name, $post_service_values | {
       if $post_service_name in $pre_result['service'].keys() {
         # ensure (running/stopped) is not in the same state as prior to patching
-        $pre_result['service'][$post_service_name]['ensure'] != $post_result['service'][$post_service_name]['ensure']
+        $post_result['service'][$post_service_name]['ensure'] != $pre_result['service'][$post_service_name]['ensure']
       }
     }
     # if any of these are non-empty, add to results (if all are empty this means no changes)
-    unless ( $changed_services.empty and $pre_but_not_post.empty and $post_but_not_pre.empty ) {
+    unless ( $changed_post_patch.empty and $missing_post_patch.empty and $new_post_patch.empty ) {
       $memo + { $target_name => {
-                  'changed_status'    => $changed_services,
-                  'absent_post_patch' => $pre_but_not_post,
-                  'new_post_patch'    => $post_but_not_pre,
+                  'changed_post_patch' => $changed_post_patch,
+                  'absent_post_patch'  => $missing_post_patch,
+                  'new_post_patch'     => $new_post_patch,
                 }
               }
     }
   }
 
-  if service_changes.empty {
-    out::message($service_changes)
+  # hash of changes to return
+  # for now set to service_changes if not empty
+  # potentially add package, other checks that are added
+  if ! service_changes.empty {
+    $changes = { 'service_changes' => $service_changes }
+  } else {
+    $changes = {}
   }
-  return()
+
+  if ! changes.empty {
+    return($changes)
+  } else {
+    return()
+  }
 }

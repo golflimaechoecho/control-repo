@@ -6,7 +6,7 @@ plan profile::windows_tidy_c_tmpfiles (
   TargetSpec $targets,
   Boolean recurse = false,
   Boolean noop = false,
-){
+) {
   $results = apply($targets, '_catch_errors' => true, '_noop' => true) {
     # https://puppet.com/docs/puppet/6.18/types/tidy.html
     # to use matches, recurse must be non-zero/non-false.
@@ -23,4 +23,6 @@ plan profile::windows_tidy_c_tmpfiles (
       noop    => $noop,
     }
   }
+
+  return($results)
 }

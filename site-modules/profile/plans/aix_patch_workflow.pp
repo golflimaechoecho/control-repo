@@ -12,6 +12,7 @@ plan profile::aix_patch_workflow (
   Integer[0] $reconnect_timeout = 600,
   Boolean    $perform_reboot = true,
   Boolean    $dry_run = false,
+  Stdlib::Absolutepath $mksysb_location = '/export/nim/mksysb',
 ) {
 
   # Only pass one NIM server, otherwise how will we know which server to use for which clients
@@ -24,8 +25,9 @@ plan profile::aix_patch_workflow (
   }
 
   # Collect facts
-  run_plan(facts, targets => $nimserver)
-  run_plan(facts, targets => $nimclients)
+  # facts plan fails on AIX, appears this is due to user facts from hardening/os_hardening
+  #run_plan(facts, targets => $nimserver, '_catch_errors' => true)
+  #run_plan(facts, targets => $nimclients, '_catch_errors' => true)
 
   # Filter AIX targets only
   $aix_nimserver = get_targets($nimserver).filter | $nsrv | {
@@ -45,8 +47,8 @@ plan profile::aix_patch_workflow (
   # Check sufficient space before starting
   # This runs on individual clients
   out::message("Placeholder to check space")
-  run_task('profile::aix_check_space_placeholder', $aix_nimserver, filesystem => '/')
-  run_task('profile::aix_check_space_placeholder', $aix_nimclients, filesystem => '/')
+  run_task('profile::aix_check_space_placeholder', $aix_nimserver, filesystem => '/', '_catch_errors' => true)
+  run_task('profile::aix_check_space_placeholder', $aix_nimclients, filesystem => '/', '_catch_errors' => true)
 
   # If the NIM server can operate on multiple clients in parallel, the task(s)
   # being called could be written to pass a list of client names instead of
@@ -65,20 +67,20 @@ plan profile::aix_patch_workflow (
 
     out::message("Placeholder connectivity check on ${nimserver_name} for ${nimclient_name}")
     # Check NIM server can connect to the client (triggered from NIM server, passing client as parameter)
-    run_task('profile::aix_nim_connectivity_placeholder', $nimserver, nimclient => $nimclient_name)
+    run_task('profile::aix_nim_connectivity_placeholder', $nimserver, nimclient => $nimclient_name, '_catch_errors' => true)
 
     out::message("Placeholder mksysb on ${nimserver_name} for ${nimclient_name}")
     # Perform mksysb (triggered from NIM server, passing client as parameter)
-    run_task('profile::aix_mksysb_via_nim_placeholder', $nimserver, nimclient => $nimclient_name)
+    run_task('profile::aix_mksysb_via_nim_placeholder', $nimserver, nimclient => $nimclient_name, location => $mksysb_location, '_catch_errors' => true)
 
     out::message("Placeholder patch install on ${nimserver_name} for ${nimclient_name}")
     # install patches (triggered from the NIM server, passing client as parameter)
-    run_task('profile::aix_install_patch_via_nim_placeholder', $nimserver, nimclient => $nimclient_name)
+    run_task('profile::aix_install_patch_via_nim_placeholder', $nimserver, nimclient => $nimclient_name, '_catch_errors' => true)
 
     out::message("Reboot for ${nimclient_name} - perform_reboot is ${perform_reboot}")
     if $perform_reboot and ( ! $dry_run ) {
       # Reboot the NIM client after patch installation
-      run_plan('reboot', targets => $nimclient, reconnect_timeout => $reconnect_timeout)
+      run_plan('reboot', targets => $nimclient, reconnect_timeout => $reconnect_timeout, '_catch_errors' => true)
     } else {
       out::message("Skipping reboot for ${nimclient_name} as perform_reboot ${perform_reboot} or dry_run ${dry_run} specified")
     }

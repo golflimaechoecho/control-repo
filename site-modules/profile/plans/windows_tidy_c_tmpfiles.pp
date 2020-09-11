@@ -11,7 +11,7 @@ plan profile::windows_tidy_c_tmpfiles (
   # to use matches, recurse must be non-zero/non-false.
   # specify recurse = 1 to not descend into subdirectories
   $results = apply($targets, '_noop' => $noop) {
-    notify { $target.name: }
+    notify { get_target($targets).name: }
     #class { 'profile::windows_tidy_c_tmpfiles':
     #  recurse => $recurse,
     #}

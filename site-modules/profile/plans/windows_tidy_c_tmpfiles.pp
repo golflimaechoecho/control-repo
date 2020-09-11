@@ -2,10 +2,10 @@
 # @param targets Targets to tidy
 # @param recurse Whether to recursively descend to tidy. Defaults to false.
 # @param noop Whether to run in noop. Defaults to false (ie: will remove files)
-plan profile::windows_tidy_ctmpfiles (
+plan profile::windows_tidy_c_tmpfiles (
   TargetSpec $targets,
-  Boolean recurse = false,
-  Boolean noop = false,
+  Boolean $recurse = false,
+  Boolean $noop = false,
 ) {
   $results = apply($targets) {
     # https://puppet.com/docs/puppet/6.18/types/tidy.html

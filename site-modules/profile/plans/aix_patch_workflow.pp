@@ -5,6 +5,8 @@
 # @param reconnect_timeout How long (in seconds) to attempt to reconnect after reboot before giving up. Defaults to 600.
 # @param perform_reboot Whether to perform reboot or just print message. Defaults to true.
 # @param dry_run Currently unused; could be used to determine whether to actually run. Defaults to false.
+# @param mksysb_location path/location to write mksysb on NIM server
+# @param spot_location path/location to write spot on NIM server
 #
 plan profile::aix_patch_workflow (
   TargetSpec $nimserver,
@@ -62,7 +64,7 @@ plan profile::aix_patch_workflow (
   # Loop over each client (assumes the NIM server will operate on one client at a time)
   $aix_nimclients.each | $nimclient | {
     # Assumes NIM server can parse client names in same format as TargetSpec (eg: certname/fqdn)
-    # eg: could possibly use .host rather than .name depending on NIM requirements
+    # If shortnames are needed, this can be done by the underlying script used by the task
     # https://puppet.com/docs/bolt/latest/bolt_types_reference.html#target
     $nimclient_name = $nimclient.name
 

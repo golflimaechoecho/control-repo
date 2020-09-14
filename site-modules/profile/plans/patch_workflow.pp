@@ -92,6 +92,7 @@ plan profile::patch_workflow (
     # pass noop based on whether this is dry_run
     if $dry_run {
       $snapshot_vmware_noop = true
+      out::message("Dry run: run snapshot_vmware here")
     } else {
       $snapshot_vmware_noop = false
     }

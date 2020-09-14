@@ -58,7 +58,9 @@ plan profile::patch_workflow (
   # Commvault backup placeholder
   # where specified by parameter or physical hosts (is_virtual == false)
   $commvault_targets = get_targets($targets).filter | $target | {
-    ( $backup_method == 'commvault' ) or ( $target.facts['is_virtual'] == false )
+    if ( $backup_method == 'commvault' or $target.facts['is_virtual'] == false ) {
+      true
+    }
   }
 
   out::message("commvault_targets is ${commvault_targets}")
@@ -68,7 +70,9 @@ plan profile::patch_workflow (
   # TBD: check how this is represented by facts['virtual']/how differentiated from vmware
   # https://puppet.com/docs/puppet/6.18/core_facts.html#virtual
   $nutanix_targets = get_targets($targets).filter | $target | {
-    ( $backup_method == 'nutanix' ) or ( $target.facts['virtual'] == 'nutanix' )
+    if ( $backup_method == 'nutanix' or $target.facts['virtual'] == 'nutanix' ) {
+      true
+    }
   }
 
   out::message("nutanix_targets is ${nutanix_targets}")
@@ -76,21 +80,11 @@ plan profile::patch_workflow (
   # vmware snapshot placeholder
   # for now assume vmware if it has not been picked up by commvault or nutanix targets
   $vmware_targets = get_targets($targets).filter | $target | {
-    ( ! $target in get_targets($commvault_targets) ) and ( ! $target in get_targets($nutanix_targets) )
-  }
-  out::message("vmware_targets is ${vmware_targets}")
-
-  # set vars for snapshot_vmware
-  if ! get_targets($vmware_targets).empty {
-    $vmware_targets.each | $target | {
-      $target.set_var('target_name_property', $target_name_property)
-      $target.set_var('vsphere_host', $vsphere_host)
-      $target.set_var('vsphere_username', $vsphere_username)
-      $target.set_var('vsphere_password', $vsphere_password)
-      $target.set_var('vsphere_datacenter', $vsphere_datacenter)
-      $target.set_var('vsphere_insecure', $vsphere_insecure)
+    if ( ! $target in get_targets($commvault_targets) and ! $target in get_targets($nutanix_targets) ) {
+      true
     }
   }
+  out::message("vmware_targets is ${vmware_targets}")
 
   # List service status prior to patching for later comparison
   $services_before_patching = without_default_logging() || {
@@ -102,14 +96,14 @@ plan profile::patch_workflow (
   run_plan('profile::nutanix_placeholder', targets => $nutanix_targets)
 
   # placeholder for patching::snapshot_vmware, replace once firewall rules in place/confirmed working
-  run_plan('profile::snapshot_placeholder', targets => $vmware_targets)
-  #                                            target_name_property => $target_name_property,
-  #                                            vsphere_host         => $vsphere_host,
-  #                                            vsphere_username     => $vsphere_username,
-  #                                            vsphere_password     => $vsphere_password,
-  #                                            vsphere_datacenter   => $vsphere_datacenter,
-  #                                            vsphere_insecure     => $vsphere_insecure
-  #  )
+  run_plan('profile::snapshot_placeholder', targets              => $vmware_targets,
+                                            target_name_property => $target_name_property,
+                                            vsphere_host         => $vsphere_host,
+                                            vsphere_username     => $vsphere_username,
+                                            vsphere_password     => $vsphere_password,
+                                            vsphere_datacenter   => $vsphere_datacenter,
+                                            vsphere_insecure     => $vsphere_insecure
+  )
   #  #run_plan('patching::snapshot_vmware', targets              => $vmware_targets,
   #                                      action               => 'create',
   #                                      target_name_property => $target_name_property,

@@ -84,27 +84,33 @@ plan profile::patch_workflow (
   }
 
   # run respective snapshot/backups based on commvault/nutanix/vmware
-  run_plan('profile::commvault_placeholder', targets => $commvault_targets)
-  run_plan('profile::nutanix_placeholder', targets => $nutanix_targets)
+  if ! get_targets($commvault_targets).empty {
+    run_plan('profile::commvault_placeholder', targets => $commvault_targets)
+  }
+  if ! get_targets($nutanix_targets).empty {
+    run_plan('profile::nutanix_placeholder', targets => $nutanix_targets)
+  }
 
-  # placeholder for patching::snapshot_vmware, replace once firewall rules in place/confirmed working
-  run_plan('profile::snapshot_placeholder', targets              => $vmware_targets,
-                                            target_name_property => $target_name_property,
-                                            vsphere_host         => $vsphere_host,
-                                            vsphere_username     => $vsphere_username,
-                                            vsphere_password     => $vsphere_password,
-                                            vsphere_datacenter   => $vsphere_datacenter,
-                                            vsphere_insecure     => $vsphere_insecure
-  )
-  #  #run_plan('patching::snapshot_vmware', targets              => $vmware_targets,
-  #                                      action               => 'create',
-  #                                      target_name_property => $target_name_property,
-  #                                      vsphere_host         => $vsphere_host,
-  #                                      vsphere_username     => $vsphere_username,
-  #                                      vsphere_password     => $vsphere_password,
-  #                                      vsphere_datacenter   => $vsphere_datacenter,
-  #                                      vsphere_insecure     => $vsphere_insecure
-  #)
+  if ! get_targets($vmware_targets).empty {
+    # placeholder for patching::snapshot_vmware, replace once firewall rules in place/confirmed working
+    run_plan('profile::snapshot_placeholder', targets              => $vmware_targets,
+                                              target_name_property => $target_name_property,
+                                              vsphere_host         => $vsphere_host,
+                                              vsphere_username     => $vsphere_username,
+                                              vsphere_password     => $vsphere_password,
+                                              vsphere_datacenter   => $vsphere_datacenter,
+                                              vsphere_insecure     => $vsphere_insecure
+    )
+    #  #run_plan('patching::snapshot_vmware', targets              => $vmware_targets,
+    #                                      action               => 'create',
+    #                                      target_name_property => $target_name_property,
+    #                                      vsphere_host         => $vsphere_host,
+    #                                      vsphere_username     => $vsphere_username,
+    #                                      vsphere_password     => $vsphere_password,
+    #                                      vsphere_datacenter   => $vsphere_datacenter,
+    #                                      vsphere_insecure     => $vsphere_insecure
+    #)
+  }
 
   if $perform_reboot and ( ! $dry_run ) {
     run_plan('reboot', targets => $targets, reconnect_timeout => $reconnect_timeout)

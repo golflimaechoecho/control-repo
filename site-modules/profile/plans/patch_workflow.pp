@@ -61,7 +61,7 @@ plan profile::patch_workflow (
     ( $backup_method == 'commvault' ) or ( $target.facts['is_virtual'] == false )
   }
 
-  out::message("commvault_targets is " + get_targets(${commvault_targets}))
+  out::message("commvault_targets is ${commvault_targets}")
 
   # Nutanix snapshot placeholder
   # where specified by parameter or by [fact TBD to show this is Nutanix]

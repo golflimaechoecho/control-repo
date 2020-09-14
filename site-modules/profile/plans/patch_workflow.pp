@@ -55,6 +55,16 @@ plan profile::patch_workflow (
   # note: facts plan fails on AIX, appears this is due to user facts from hardening/os_hardening
   run_plan(facts, targets => $targets, '_catch_errors' => true)
 
+  $centos_targets = get_targets($targets).filter | $target | {
+    $target.facts['os']['name'] == 'CentOs'
+  }
+  out::message("centos_targets is ${centos_targets}")
+
+  $windows_targets = get_targets($targets).filter | $target | {
+    $target.facts['os']['name'] == 'windows'
+  }
+  out::message("windows_targets is ${windows_targets}")
+
   # Commvault backup placeholder
   # where specified by parameter or physical hosts (is_virtual == false)
   $commvault_targets = get_targets($targets).filter | $target | {

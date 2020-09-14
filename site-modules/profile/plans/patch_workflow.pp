@@ -13,6 +13,8 @@
 #       `name` is usually a short name or nickname.
 #    - `hostname`: use the `hostname` value to use host component of `uri` property on the Target
 #      this can be useful if VM name doesn't include domain name
+#    - `upcase_hostname`: uppercase the `host component of `uri` property on the Target as
+#      workaround where VMware names are in uppercase. Does not cater for hosts with mixedcase names
 #
 # @param [String[1]] vsphere_host
 #   Hostname of the vSphere server that we're going to use to create snapshots via the API.
@@ -38,7 +40,7 @@
 plan profile::patch_workflow (
   TargetSpec $targets,
   Optional[Enum['commvault', 'nutanix', 'vmware']] $backup_method = undef,
-  Optional[Enum['hostname', 'name', 'uri']] $target_name_property = 'hostname',
+  Optional[Enum['hostname', 'name', 'uri', 'upcase_hostname']] $target_name_property = 'upcase_hostname',
   String[1] $vsphere_host       = get_targets($targets)[0].vars['vsphere_host'],
   String[1] $vsphere_username   = get_targets($targets)[0].vars['vsphere_username'],
   String[1] $vsphere_password   = get_targets($targets)[0].vars['vsphere_password'],
@@ -87,24 +89,17 @@ plan profile::patch_workflow (
   }
 
   if ! get_targets($vmware_targets).empty {
-    # placeholder for patching::snapshot_vmware, replace once firewall rules in place/confirmed working
-    run_plan('profile::snapshot_placeholder', targets              => $vmware_targets,
+    # test bnm_patching::snapshot_vmware in noop only for now
+    run_plan('bnm_patching::snapshot_vmware', targets              => $vmware_targets,
+                                              action               => 'create',
                                               target_name_property => $target_name_property,
                                               vsphere_host         => $vsphere_host,
                                               vsphere_username     => $vsphere_username,
                                               vsphere_password     => $vsphere_password,
                                               vsphere_datacenter   => $vsphere_datacenter,
-                                              vsphere_insecure     => $vsphere_insecure
+                                              vsphere_insecure     => $vsphere_insecure,
+                                              noop                 => true
     )
-    #  #run_plan('patching::snapshot_vmware', targets              => $vmware_targets,
-    #                                      action               => 'create',
-    #                                      target_name_property => $target_name_property,
-    #                                      vsphere_host         => $vsphere_host,
-    #                                      vsphere_username     => $vsphere_username,
-    #                                      vsphere_password     => $vsphere_password,
-    #                                      vsphere_datacenter   => $vsphere_datacenter,
-    #                                      vsphere_insecure     => $vsphere_insecure
-    #)
   }
 
   if $perform_reboot and ( ! $dry_run ) {

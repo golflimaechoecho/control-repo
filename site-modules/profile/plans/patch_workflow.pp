@@ -38,7 +38,7 @@
 plan profile::patch_workflow (
   TargetSpec $targets,
   Optional[Enum['commvault', 'nutanix', 'vmware']] $backup_method = undef,
-  Optional[Enum['hostname', 'name', 'uri']] $target_name_property = undef,
+  Optional[Enum['hostname', 'name', 'uri']] $target_name_property = 'hostname',
   String[1] $vsphere_host       = get_targets($targets)[0].vars['vsphere_host'],
   String[1] $vsphere_username   = get_targets($targets)[0].vars['vsphere_username'],
   String[1] $vsphere_password   = get_targets($targets)[0].vars['vsphere_password'],
@@ -55,13 +55,13 @@ plan profile::patch_workflow (
   # note: facts plan fails on AIX, appears this is due to user facts from hardening/os_hardening
   run_plan(facts, targets => $targets, '_catch_errors' => true)
 
-  out::message("backup_method is ${backup_method}")
-
   # Commvault backup placeholder
   # where specified by parameter or physical hosts (is_virtual == false)
   $commvault_targets = get_targets($targets).filter | $target | {
     ( $backup_method == 'commvault' ) or $target.facts['is_virtual'] == false
   }
+
+  out::message("commvault_targets is ${commvault_targets}")
 
   # Nutanix snapshot placeholder
   # where specified by parameter or by [fact TBD to show this is Nutanix]
@@ -71,11 +71,15 @@ plan profile::patch_workflow (
     ( $backup_method == 'nutanix' ) or $target.facts['virtual'] == 'nutanix'
   }
 
+  out::message("nutanix_targets is ${nutanix_targets}")
+
   # vmware snapshot placeholder
   # for now assume vmware if it has not been picked up by commvault or nutanix targets
   $vmware_targets = get_targets($targets).filter | $target | {
     ( ! $target in get_targets($commvault_targets) ) and ( ! $target in get_targets($nutanix_targets) )
   }
+  out::message("vmware_targets is ${vmware_targets}")
+
   # set vars for snapshot_vmware
   $vmware_targets.each | $target | {
     $target.set_var('target_name_property', $target_name_property)
@@ -96,15 +100,15 @@ plan profile::patch_workflow (
   run_plan('profile::nutanix_placeholder', targets => $nutanix_targets)
 
   # placeholder for patching::snapshot_vmware, replace once firewall rules in place/confirmed working
-  run_plan('profile::snapshot_placeholder', targets              => $vmware_targets,
-                                            target_name_property => $target_name_property,
-                                            vsphere_host         => $vsphere_host,
-                                            vsphere_username     => $vsphere_username,
-                                            vsphere_password     => $vsphere_password,
-                                            vsphere_datacenter   => $vsphere_datacenter,
-                                            vsphere_insecure     => $vsphere_insecure
-  )
-  #run_plan('patching::snapshot_vmware', targets              => $vmware_targets,
+  run_plan('profile::snapshot_placeholder', targets => $vmware_targets)
+  #                                            target_name_property => $target_name_property,
+  #                                            vsphere_host         => $vsphere_host,
+  #                                            vsphere_username     => $vsphere_username,
+  #                                            vsphere_password     => $vsphere_password,
+  #                                            vsphere_datacenter   => $vsphere_datacenter,
+  #                                            vsphere_insecure     => $vsphere_insecure
+  #  )
+  #  #run_plan('patching::snapshot_vmware', targets              => $vmware_targets,
   #                                      action               => 'create',
   #                                      target_name_property => $target_name_property,
   #                                      vsphere_host         => $vsphere_host,

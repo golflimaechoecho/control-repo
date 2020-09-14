@@ -55,22 +55,10 @@ plan profile::patch_workflow (
   # note: facts plan fails on AIX, appears this is due to user facts from hardening/os_hardening
   run_plan(facts, targets => $targets, '_catch_errors' => true)
 
-  $centos_targets = get_targets($targets).filter | $target | {
-    $target.facts['os']['name'] == 'CentOs'
-  }
-  out::message("centos_targets is ${centos_targets}")
-
-  $windows_targets = get_targets($targets).filter | $target | {
-    $target.facts['os']['name'] == 'windows'
-  }
-  out::message("windows_targets is ${windows_targets}")
-
   # Commvault backup placeholder
   # where specified by parameter or physical hosts (is_virtual == false)
   $commvault_targets = get_targets($targets).filter | $target | {
-    if ( $backup_method == 'commvault' or $target.facts['is_virtual'] == false ) {
-      true
-    }
+    $backup_method == 'commvault' or $target.facts['is_virtual'] == false
   }
 
   out::message("commvault_targets is ${commvault_targets}")
@@ -80,20 +68,14 @@ plan profile::patch_workflow (
   # TBD: check how this is represented by facts['virtual']/how differentiated from vmware
   # https://puppet.com/docs/puppet/6.18/core_facts.html#virtual
   $nutanix_targets = get_targets($targets).filter | $target | {
-    if ( $backup_method == 'nutanix' or $target.facts['virtual'] == 'nutanix' ) {
-      true
-    }
+    $backup_method == 'nutanix' or $target.facts['virtual'] == 'nutanix'
   }
 
   out::message("nutanix_targets is ${nutanix_targets}")
 
   # vmware snapshot placeholder
   # for now assume vmware if it has not been picked up by commvault or nutanix targets
-  $vmware_targets = get_targets($targets).filter | $target | {
-    if ( ! $target in get_targets($commvault_targets) and ! $target in get_targets($nutanix_targets) ) {
-      true
-    }
-  }
+  $vmware_targets = $targets - ($commvault_targets + $nutanix_targets)
   out::message("vmware_targets is ${vmware_targets}")
 
   # List service status prior to patching for later comparison

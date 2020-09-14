@@ -36,6 +36,7 @@
 #
 plan profile::patch_workflow (
   TargetSpec $targets,
+  Optional[Enum['commvault', 'nutanix', 'vmware']] $backup_method = undef,
   Optional[Enum['hostname', 'name', 'uri']] $target_name_property = undef,
   String[1] $vsphere_host       = get_targets($targets)[0].vars['vsphere_host'],
   String[1] $vsphere_username   = get_targets($targets)[0].vars['vsphere_username'],
@@ -49,13 +50,43 @@ plan profile::patch_workflow (
   Boolean    $perform_reboot = true,
   Boolean    $dry_run = false,
 ) {
+  # Collect facts
+  # note: facts plan fails on AIX, appears this is due to user facts from hardening/os_hardening
+  run_plan(facts, targets => $targets, '_catch_errors' => true)
 
+  out::message("backup_method is ${backup_method")
+
+  # Commvault backup placeholder
+  # where specified by parameter or physical hosts (is_virtual == false)
+  $commvault_targets = get_targets($targets).filter | $target | {
+    ( $backup_method == 'commvault' ) or $target.facts['is_virtual'] == false
+  }
+
+  # Nutanix snapshot placeholder
+  # where specified by parameter or by [fact TBD to show this is Nutanix]
+  # TBD: check how this is represented by facts['virtual']/how differentiated from vmware
+  # https://puppet.com/docs/puppet/6.18/core_facts.html#virtual
+  $nutanix_targets = get_targets($targets).filter | $target | {
+    ( $backup_method == 'nutanix' ) or $target.facts['virtual'] == 'nutanix'
+  }
+
+  # vmware snapshot placeholder
+  # for now assume vmware if it has not been picked up by commvault or nutanix targets
+  $vmware_targets = get_targets($targets).filter | $target | {
+    ( ! $target in $commvault_targets ) and ( ! $target in $nutanix_targets )
+  }
+
+  # List service status prior to patching for later comparison
   $services_before_patching = without_default_logging() || {
     run_task('profile::check_services', $targets)
   }
 
+  # run respective snapshot/backups based on commvault/nutanix/vmware
+  run_plan('profile::commvault_placeholder', targets => $commvault_targets)
+  run_plan('profile::nutanix_placeholder', targets => $nutanix_targets)
+
   # placeholder for patching::snapshot_vmware, replace once firewall rules in place/confirmed working
-  run_plan('profile::snapshot_placeholder', targets              => $targets,
+  run_plan('profile::snapshot_placeholder', targets              => $vmware_targets,
                                             target_name_property => $target_name_property,
                                             vsphere_host         => $vsphere_host,
                                             vsphere_username     => $vsphere_username,
@@ -63,7 +94,7 @@ plan profile::patch_workflow (
                                             vsphere_datacenter   => $vsphere_datacenter,
                                             vsphere_insecure     => $vsphere_insecure
   )
-  #run_plan('patching::snapshot_vmware', targets              => $targets,
+  #run_plan('patching::snapshot_vmware', targets              => $vmware_targets,
   #                                      action               => 'create',
   #                                      target_name_property => $target_name_property,
   #                                      vsphere_host         => $vsphere_host,
@@ -76,7 +107,7 @@ plan profile::patch_workflow (
   if $perform_reboot and ( ! $dry_run ) {
     run_plan('reboot', targets => $targets, reconnect_timeout => $reconnect_timeout)
   } else {
-    out::message("Skipping reboot as perform_reboot false or dry_run ${dry_run} specified")
+    out::message("Skipping pre-patch reboot as perform_reboot false or dry_run ${dry_run} specified")
   }
 
   # insert additional delay/sleep before running pe_patch, as pe_patch fact

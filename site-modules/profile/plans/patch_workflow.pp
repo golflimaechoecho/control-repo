@@ -89,7 +89,12 @@ plan profile::patch_workflow (
   }
 
   if ! get_targets($vmware_targets).empty {
-    # test bnm_patching::snapshot_vmware in noop only for now
+    # pass noop based on whether this is dry_run
+    if $dry_run {
+      $snapshot_vmware_noop = true
+    } else {
+      $snapshot_vmware_noop = false
+    }
     run_plan('bnm_patching::snapshot_vmware', targets              => $vmware_targets,
                                               action               => 'create',
                                               target_name_property => $target_name_property,
@@ -98,7 +103,7 @@ plan profile::patch_workflow (
                                               vsphere_password     => $vsphere_password,
                                               vsphere_datacenter   => $vsphere_datacenter,
                                               vsphere_insecure     => $vsphere_insecure,
-                                              noop                 => true
+                                              noop                 => $snapshot_vmware_noop
     )
   }
 

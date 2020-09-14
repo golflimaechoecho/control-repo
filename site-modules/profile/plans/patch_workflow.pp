@@ -159,7 +159,7 @@ plan profile::patch_workflow (
   # hash of changes to return
   # for now set to service_changes if not empty
   # potentially add package, other checks that are added
-  if ! service_changes.empty {
+  if ! $service_changes.empty {
     $changes = { 'service_changes' => $service_changes }
   } else {
     $changes = {}

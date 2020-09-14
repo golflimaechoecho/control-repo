@@ -75,7 +75,7 @@ plan profile::patch_workflow (
 
   # vmware snapshot placeholder
   # for now assume vmware if it has not been picked up by commvault or nutanix targets
-  $vmware_targets = $targets - ($commvault_targets + $nutanix_targets)
+  $vmware_targets = get_targets($targets) - (get_targets($commvault_targets) + get_targets($nutanix_targets))
   out::message("vmware_targets is ${vmware_targets}")
 
   # List service status prior to patching for later comparison

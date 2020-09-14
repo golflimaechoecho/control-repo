@@ -1,6 +1,7 @@
 # plan to run patch workflow
 #
 # @param targets Targets to patch
+# @param backup_method method to snapshot/backup (ie: commvault, nutanix, vmware)
 # @param [Optional[Enum['hostname', 'name', 'uri']]] target_name_property
 #   Determines what property on the Target object will be used as the VM name when
 #   mapping the Target to a VM in vSphere.
@@ -54,7 +55,7 @@ plan profile::patch_workflow (
   # note: facts plan fails on AIX, appears this is due to user facts from hardening/os_hardening
   run_plan(facts, targets => $targets, '_catch_errors' => true)
 
-  out::message("backup_method is ${backup_method")
+  out::message("backup_method is ${backup_method}")
 
   # Commvault backup placeholder
   # where specified by parameter or physical hosts (is_virtual == false)

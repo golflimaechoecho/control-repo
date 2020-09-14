@@ -61,8 +61,6 @@ plan profile::patch_workflow (
     $backup_method == 'commvault' or $target.facts['is_virtual'] == false
   }
 
-  out::message("commvault_targets is ${commvault_targets}")
-
   # Nutanix snapshot placeholder
   # where specified by parameter or by [fact TBD to show this is Nutanix]
   # TBD: check how this is represented by facts['virtual']/how differentiated from vmware
@@ -71,12 +69,9 @@ plan profile::patch_workflow (
     $backup_method == 'nutanix' or $target.facts['virtual'] == 'nutanix'
   }
 
-  out::message("nutanix_targets is ${nutanix_targets}")
-
   # vmware snapshot placeholder
   # for now assume vmware if it has not been picked up by commvault or nutanix targets
   $vmware_targets = get_targets($targets) - (get_targets($commvault_targets) + get_targets($nutanix_targets))
-  out::message("vmware_targets is ${vmware_targets}")
 
   # List service status prior to patching for later comparison
   $services_before_patching = without_default_logging() || {

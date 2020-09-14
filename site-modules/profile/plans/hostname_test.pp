@@ -1,5 +1,5 @@
 # test host output
-plan profile::hostname (
+plan profile::hostname_test (
   TargetSpec $targets,
 ) {
   get_targets($targets).each | $target | {

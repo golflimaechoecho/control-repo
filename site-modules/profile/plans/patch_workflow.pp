@@ -165,7 +165,7 @@ plan profile::patch_workflow (
     $changes = {}
   }
 
-  if ! changes.empty {
+  if ! $changes.empty {
     return($changes)
   } else {
     return()

@@ -74,7 +74,16 @@ plan profile::patch_workflow (
   # vmware snapshot placeholder
   # for now assume vmware if it has not been picked up by commvault or nutanix targets
   $vmware_targets = get_targets($targets).filter | $target | {
-    ( ! $target in $commvault_targets ) and ( ! $target in $nutanix_targets )
+    ( ! $target in get_targets($commvault_targets) ) and ( ! $target in get_targets($nutanix_targets) )
+  }
+  # set vars for snapshot_vmware
+  $vmware_targets.each | $target | {
+    $target.set_var('target_name_property', $target_name_property)
+    $target.set_var('vsphere_host', $vsphere_host)
+    $target.set_var('vsphere_username', $vsphere_username)
+    $target.set_var('vsphere_password', $vsphere_password)
+    $target.set_var('vsphere_datacenter', $vsphere_datacenter)
+    $target.set_var('vsphere_insecure', $vsphere_insecure)
   }
 
   # List service status prior to patching for later comparison

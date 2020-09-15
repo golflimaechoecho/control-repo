@@ -147,9 +147,17 @@ plan profile::patch_workflow (
       if $post_service_name in $pre_result['service'].keys() {
         # ensure (running/stopped) is not in the same state as prior to patching
         # restrict check to automatic services (enable = true) as agreed with CBM
-        $post_result['service'][$post_service_name]['enable'] == "true" and ( $post_result['service'][$post_service_name]['ensure'] != $pre_result['service'][$post_service_name]['ensure'] )
+        # NOTE: if service was stopped prior to patching then didn't start on
+        # boot this would not be recorded as the statuses would match
+        $post_result['service'][$post_service_name]['enable'] == 'true' and ( $post_result['service'][$post_service_name]['ensure'] != $pre_result['service'][$post_service_name]['ensure'] )
       }
     }
+    # To only check if enabled services were running, a separate check could be
+    # added and the results added to memo. example below (not added to memo yet)
+    #$enabled_not_running = $post_result['service'].filter | $post_service_name, $post_service_values | {
+    #  $post_result['service'][$post_service_name]['enable'] == 'true' and $post_result['service'][$post_service_name]['ensure'] != 'running'
+    #}
+
     # if any of these are non-empty, add to results (if all are empty this means no changes)
     unless ( $changed_post_patch.empty and $missing_post_patch.empty and $new_post_patch.empty ) {
       $memo + { $target_name => {

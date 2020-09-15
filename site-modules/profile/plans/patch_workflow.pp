@@ -1,8 +1,14 @@
-# plan to run patch workflow
+# @summary plan to run patch workflow
 #
-# @param targets Targets to patch
-# @param backup_method method to snapshot/backup (ie: commvault, nutanix, vmware)
-# @param [Optional[Enum['hostname', 'name', 'uri']]] target_name_property
+# Uses pe_patch to perform patching on Linux and Windows
+#
+# @param [TargetSpec] targets
+#   Targets to patch
+#
+# @param [Optional[Enum['commvault', 'nutanix', 'vmware']]] backup_method
+#   Method to perform snapshot/backup
+#
+# @param [Optional[Enum['hostname', 'name', 'uri', 'upcase_hostname']]] target_name_property
 #   Determines what property on the Target object will be used as the VM name when
 #   mapping the Target to a VM in vSphere.
 #
@@ -16,40 +22,66 @@
 #    - `upcase_hostname`: uppercase the `host component of `uri` property on the Target as
 #      workaround where VMware names are in uppercase. Does not cater for hosts with mixedcase names
 #
-# @param [String[1]] vsphere_host
+# @param [Optional[String[1]]] vsphere_host
 #   Hostname of the vSphere server that we're going to use to create snapshots via the API.
 #
-# @param [String[1]] vsphere_username
+# @param [Optional[String[1]]] vsphere_username
 #   Username to use when authenticating with the vSphere API.
 #
-# @param [String[1]] vsphere_password
+# @param [Optional[String[1]]] vsphere_password
 #   Password to use when authenticating with the vSphere API.
 #
-# @param [String[1]] vsphere_datacenter
+# @param [Optional[String[1]]] vsphere_datacenter
 #   Name of the vSphere datacenter to search for VMs under.
 #
 # @param [Boolean] vsphere_insecure
 #   Flag to enable insecure HTTPS connections by disabling SSL server certificate verification.
-# @param reconnect_timeout How long (in seconds) to attempt to reconnect after reboot before giving up. Defaults to 180.
-# @param lock_check_timeout How long (in seconds) to attempt to recheck before giving up. Defaults to 600.
-# @param lock_retry_interval How long (in seconds) to wait between retries. Defaults to 5.
-# @param fail_plan_on_errors Raise an error if any targets do not successfully unlock. Defaults to true.
-# @param perform_reboot Whether to perform reboot or just print message (NOTE: this determines pre-patch reboot behaviour only; pe_patch may still initiate reboot depending on configuration). Defaults to true.
-# @param dry_run Currently unused; could be used to determine whether to actually run. Defaults to false.
+#
+# @param [Optional[String[1]]] snapshot_name
+#   Name of the snapshot
+#
+# @param [Optional[TargetSpec]] nutanix_cvm
+#   Nutanix CVM to use to create snapshots
+#
+# @param Optional[String[1]] commvault_api_server
+#   Hostname/FQDN of the CommVault API server
+#
+# @param Optional[Integer[0, 65535]] commvault_api_port
+#   Port to use to connect to CommVault API server
+#
+# @param [Integer[0]] reconnect_timeout
+#   How long (in seconds) to attempt to reconnect after reboot before giving up. Defaults to 180.
+#
+# @param [Integer[0]] pe_patch_lock_check_timeout
+#   How long (in seconds) to attempt to recheck for pe_patch lock before giving up. Defaults to 600.
+#
+# @param [Boolean] perform_backup
+#   Whether to perform backup or just print message. Defaults to true
+#
+# @param [Boolean] perform_reboot
+#   Whether to perform reboot or just print message (NOTE: this determines
+#   pre-patch reboot behaviour only; pe_patch may still initiate reboot depending
+#   on pe_patch configuration). Defaults to true.
+#
+# @param [Boolean] dry_run
+#   Set to true to dry run only, false to actually run. Defaults to false.
 #
 plan profile::patch_workflow (
   TargetSpec $targets,
   Optional[Enum['commvault', 'nutanix', 'vmware']] $backup_method = undef,
   Optional[Enum['hostname', 'name', 'uri', 'upcase_hostname']] $target_name_property = 'upcase_hostname',
-  String[1] $vsphere_host       = get_targets($targets)[0].vars['vsphere_host'],
-  String[1] $vsphere_username   = get_targets($targets)[0].vars['vsphere_username'],
-  String[1] $vsphere_password   = get_targets($targets)[0].vars['vsphere_password'],
-  String[1] $vsphere_datacenter = get_targets($targets)[0].vars['vsphere_datacenter'],
-  Boolean $vsphere_insecure     = get_targets($targets)[0].vars['vsphere_insecure'],
+  Optional[String[1]] $vsphere_host       = get_targets($targets)[0].vars['vsphere_host'],
+  Optional[String[1]] $vsphere_username   = get_targets($targets)[0].vars['vsphere_username'],
+  Optional[String[1]] $vsphere_password   = get_targets($targets)[0].vars['vsphere_password'],
+  Optional[String[1]] $vsphere_datacenter = get_targets($targets)[0].vars['vsphere_datacenter'],
+  Optional[Boolean]   $vsphere_insecure   = get_targets($targets)[0].vars['vsphere_insecure'],
+  Optional[String[1]] $snapshot_name      = undef,
+  Optional[String[1]] $commvault_api_server = 'dccebrssq01.w2k.bnm.gov.my',
+  Optional[Integer[0, 65535]] $commvault_api_port = 81,
+  Optional[TargetSpec] $nutanix_cvm = undef,
   Integer[0] $reconnect_timeout = 180,
-  Integer[0] $lock_check_timeout = 600,
-  Integer[0] $lock_retry_interval = 5,
-  Boolean    $fail_plan_on_errors = true,
+  Integer[0] $pe_patch_lock_check_timeout = 600,
+  Boolean    $perform_backup = true,
   Boolean    $perform_reboot = true,
   Boolean    $dry_run = false,
 ) {
@@ -58,17 +90,16 @@ plan profile::patch_workflow (
   run_plan(facts, targets => $targets, '_catch_errors' => true)
 
   # Commvault backup placeholder
-  # where specified by parameter or physical hosts (is_virtual == false)
+  # where specified by parameter or physical hosts ($facts['is_virtual'] == false)
   $commvault_targets = get_targets($targets).filter | $target | {
     $backup_method == 'commvault' or $target.facts['is_virtual'] == false
   }
 
   # Nutanix snapshot placeholder
-  # where specified by parameter or by [fact TBD to show this is Nutanix]
-  # TBD: check how this is represented by facts['virtual']/how differentiated from vmware
+  # Run where specified by parameter or when $facts['virtual'] == 'hyperv'
   # https://puppet.com/docs/puppet/6.18/core_facts.html#virtual
   $nutanix_targets = get_targets($targets).filter | $target | {
-    $backup_method == 'nutanix' or $target.facts['virtual'] == 'nutanix'
+    $backup_method == 'nutanix' or $target.facts['virtual'] == 'hyperv'
   }
 
   # vmware snapshot placeholder
@@ -77,35 +108,56 @@ plan profile::patch_workflow (
 
   # List service status prior to patching for later comparison
   $services_before_patching = without_default_logging() || {
-    run_task('profile::check_services', $targets)
+    run_task('profile::check_services', $targets, '_catch_errors' => true)
   }
 
   # run respective snapshot/backups based on commvault/nutanix/vmware
-  if ! get_targets($commvault_targets).empty {
-    run_plan('profile::commvault_placeholder', targets => $commvault_targets)
-  }
-  if ! get_targets($nutanix_targets).empty {
-    run_plan('profile::nutanix_placeholder', targets => $nutanix_targets)
-  }
-
-  if ! get_targets($vmware_targets).empty {
-    # pass noop based on whether this is dry_run
-    if $dry_run {
-      $snapshot_vmware_noop = true
-      out::message("Dry run: run snapshot_vmware here")
-    } else {
-      $snapshot_vmware_noop = false
+  # unless we have specified to skip backup ($perform_backup == false)
+  if $perform_backup {
+    if ! get_targets($commvault_targets).empty {
+      run_plan('profile::commvault_placeholder', targets => $commvault_targets)
     }
-    run_plan('patching::snapshot_vmware', targets              => $vmware_targets,
-                                          action               => 'create',
-                                          target_name_property => $target_name_property,
-                                          vsphere_host         => $vsphere_host,
-                                          vsphere_username     => $vsphere_username,
-                                          vsphere_password     => $vsphere_password,
-                                          vsphere_datacenter   => $vsphere_datacenter,
-                                          vsphere_insecure     => $vsphere_insecure,
-                                          noop                 => $snapshot_vmware_noop
-    )
+
+    if ! get_targets($nutanix_targets).empty {
+      if $nutanix_cvm == undef {
+        fail_plan('nutanix_cvm is required to perform nutanix snapshot',
+          'bolt/patch_workflow-failed', {
+            action     => 'plan/patch_workflow',
+            result_set => $nutanix_targets,
+        })
+      }
+
+      run_plan('profile::nutanix_placeholder', controller_vm    => $nutanix_cvm,
+                                                targetvm        => $nutanix_targets,
+                                                action          => 'create',
+                                                snapshot_name   => $snapshot_name,
+                                                noop            => true,
+                                                '_catch_errors' => true
+      )
+    }
+
+    if ! get_targets($vmware_targets).empty {
+      # pass noop based on whether this is dry_run
+      if $dry_run {
+        $snapshot_vmware_noop = true
+        out::message("Dry run: run snapshot_vmware here")
+      } else {
+        $snapshot_vmware_noop = false
+      }
+      run_plan('patching::snapshot_vmware', targets              => $vmware_targets,
+                                            action               => 'create',
+                                            target_name_property => $target_name_property,
+                                            vsphere_host         => $vsphere_host,
+                                            vsphere_username     => $vsphere_username,
+                                            vsphere_password     => $vsphere_password,
+                                            vsphere_datacenter   => $vsphere_datacenter,
+                                            vsphere_insecure     => $vsphere_insecure,
+                                            snapshot_name        => $snapshot_name,
+                                            noop                 => $snapshot_vmware_noop
+      )
+    }
+  } else {
+    out::message("Backup/snapshot not run as perform_backup set to ${perform_backup}")
   }
 
   if $perform_reboot and ( ! $dry_run ) {
@@ -116,7 +168,7 @@ plan profile::patch_workflow (
 
   # insert additional delay/sleep before running pe_patch, as pe_patch fact
   # generation runs on boot and can end up locking itself out
-  run_plan('profile::pe_patch_lock_check', targets => $targets, lock_check_timeout => $lock_check_timeout)
+  run_plan('profile::pe_patch_lock_check', targets => $targets, lock_check_timeout => $pe_patch_lock_check_timeout)
 
   if $dry_run {
     out::message("dry_run ${dry_run}: otherwise pe_patch::patch_server would be run here")
@@ -125,7 +177,7 @@ plan profile::patch_workflow (
   }
 
   $services_after_patching = without_default_logging() || {
-    run_task('profile::check_services', $targets)
+    run_task('profile::check_services', $targets, '_catch_errors' => true)
   }
 
   # check if any services from before patching are not running

@@ -1,7 +1,12 @@
-# placeholder for nutanix snapshot pending further details
+# @placeholder for nutanix snapshot pending further details
 plan profile::nutanix_placeholder (
-  TargetSpec $targets,
+  TargetSpec $controller_vm,
+  TargetSpec $targetvm,
+  Enum['create', 'delete', 'get', 'list'] $action,
+  Optional[Pattern[/[^\"\'\[\]\,\?\* \&\|\;\:]/]] $snapshot_name = undef,
+  Boolean $noop = false,
 ) {
   # placeholder for nutanix
-  out::message("Placeholder: Run nutanix snapshot")
+  $_snapshot_name = pick($snapshot_name, '')
+  out::message("Placeholder: ${action} nutanix snapshot ${_snapshot_name} using ${controller_vm} for ${targetvm}")
 }

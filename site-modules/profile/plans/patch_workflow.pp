@@ -38,7 +38,7 @@
 plan profile::patch_workflow (
   TargetSpec $targets,
   Optional[Enum['commvault', 'nutanix', 'vmware']] $backup_method = undef,
-  Optional[Enum['hostname', 'name', 'uri']] $target_name_property = 'hostname',
+  Optional[Enum['hostname', 'name', 'uri', 'upcase_hostname']] $target_name_property = 'upcase_hostname',
   String[1] $vsphere_host       = get_targets($targets)[0].vars['vsphere_host'],
   String[1] $vsphere_username   = get_targets($targets)[0].vars['vsphere_username'],
   String[1] $vsphere_password   = get_targets($targets)[0].vars['vsphere_password'],
@@ -154,7 +154,8 @@ plan profile::patch_workflow (
     $changed_post_patch = $post_result['service'].filter | $post_service_name, $post_service_values | {
       if $post_service_name in $pre_result['service'].keys() {
         # ensure (running/stopped) is not in the same state as prior to patching
-        $post_result['service'][$post_service_name]['ensure'] != $pre_result['service'][$post_service_name]['ensure']
+        # restrict check to automatic services (enable = true) as agreed with CBM
+        $post_result['service'][$post_service_name]['enable'] == true and ( $post_result['service'][$post_service_name]['ensure'] != $pre_result['service'][$post_service_name]['ensure'] )
       }
     }
     # if any of these are non-empty, add to results (if all are empty this means no changes)

@@ -87,16 +87,6 @@ plan profile::patch_workflow (
   }
 
   if ! get_targets($vmware_targets).empty {
-    # placeholder for patching::snapshot_vmware, replace once firewall rules in place/confirmed working
-    run_plan('profile::snapshot_placeholder', targets              => $vmware_targets,
-                                              target_name_property => $target_name_property,
-                                              vsphere_host         => $vsphere_host,
-                                              vsphere_username     => $vsphere_username,
-                                              vsphere_password     => $vsphere_password,
-                                              vsphere_datacenter   => $vsphere_datacenter,
-                                              vsphere_insecure     => $vsphere_insecure
-    )
-
     # pass noop based on whether this is dry_run
     if $dry_run {
       $snapshot_vmware_noop = true
@@ -104,16 +94,16 @@ plan profile::patch_workflow (
     } else {
       $snapshot_vmware_noop = false
     }
-    #run_plan('patching::snapshot_vmware', targets              => $vmware_targets,
-    #                                      action               => 'create',
-    #                                      target_name_property => $target_name_property,
-    #                                      vsphere_host         => $vsphere_host,
-    #                                      vsphere_username     => $vsphere_username,
-    #                                      vsphere_password     => $vsphere_password,
-    #                                      vsphere_datacenter   => $vsphere_datacenter,
-    #                                      vsphere_insecure     => $vsphere_insecure,
-    #                                      noop                 => $snapshot_vmware_noop
-    #)
+    run_plan('patching::snapshot_vmware', targets              => $vmware_targets,
+                                          action               => 'create',
+                                          target_name_property => $target_name_property,
+                                          vsphere_host         => $vsphere_host,
+                                          vsphere_username     => $vsphere_username,
+                                          vsphere_password     => $vsphere_password,
+                                          vsphere_datacenter   => $vsphere_datacenter,
+                                          vsphere_insecure     => $vsphere_insecure,
+                                          noop                 => $snapshot_vmware_noop
+    )
   }
 
   if $perform_reboot and ( ! $dry_run ) {

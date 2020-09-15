@@ -13,6 +13,8 @@
 #       `name` is usually a short name or nickname.
 #    - `hostname`: use the `hostname` value to use host component of `uri` property on the Target
 #      this can be useful if VM name doesn't include domain name
+#    - `upcase_hostname`: uppercase the `host component of `uri` property on the Target as
+#      workaround where VMware names are in uppercase. Does not cater for hosts with mixedcase names
 #
 # @param [String[1]] vsphere_host
 #   Hostname of the vSphere server that we're going to use to create snapshots via the API.
@@ -145,7 +147,7 @@ plan profile::patch_workflow (
       if $post_service_name in $pre_result['service'].keys() {
         # ensure (running/stopped) is not in the same state as prior to patching
         # restrict check to automatic services (enable = true) as agreed with CBM
-        $post_result['service'][$post_service_name]['enable'] == true and ( $post_result['service'][$post_service_name]['ensure'] != $pre_result['service'][$post_service_name]['ensure'] )
+        $post_result['service'][$post_service_name]['enable'] == "true" and ( $post_result['service'][$post_service_name]['ensure'] != $pre_result['service'][$post_service_name]['ensure'] )
       }
     }
     # if any of these are non-empty, add to results (if all are empty this means no changes)

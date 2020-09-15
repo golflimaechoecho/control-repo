@@ -7,6 +7,6 @@ plan profile::nutanix_placeholder (
   Boolean $noop = false,
 ) {
   # placeholder for nutanix
-  $_snapshot_name = pick($snapshot_name, '')
+  $_snapshot_name = pick($snapshot_name, 'default_name')
   out::message("Placeholder: ${action} nutanix snapshot ${_snapshot_name} using ${controller_vm} for ${targetvm}")
 }

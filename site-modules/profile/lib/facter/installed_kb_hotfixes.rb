@@ -9,7 +9,10 @@ Facter.add('installed_kb_hotfixes') do
   setcode do
     installed_kb_hash = {}
 
-    stdout, stderr, status = Open3.capture3("Get-HotFix | Select-Object HotFixID, Description, InstalledBy, InstalledOn | ConvertTo-Json")
+    # if powershell.exe is not in path may need to add extra logic to set
+    ps_exec = "powershell.exe"
+    ps_command = "Get-HotFix | Select-Object HotFixID, Description, InstalledBy, InstalledOn | ConvertTo-Json -Compress"
+    stdout, stderr, status = Open3.capture3(ps_exec, "-Command", ps_command)
 
     # capture3 returns stdout as a string (representing an array of json hashes)
     # parse this string into json; convert to a single hash with hotfixid as keys

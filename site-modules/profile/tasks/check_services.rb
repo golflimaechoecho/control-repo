@@ -1,4 +1,5 @@
 #!/opt/puppetlabs/puppet/bin/ruby
+require 'rbconfig'
 require 'json'
 require 'yaml'
 require 'open3'

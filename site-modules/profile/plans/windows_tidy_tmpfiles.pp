@@ -46,8 +46,8 @@ plan profile::windows_tidy_tmpfiles (
   if $noop {
     out::message("Run tmpfile cleanup: ${command}")
   } else {
-    $results = run_command($command, $windows_targets, '_catch_errors' => true)
+    return(run_command($command, $windows_targets, '_catch_errors' => true))
   }
 
-  return($results)
+  return()
 }

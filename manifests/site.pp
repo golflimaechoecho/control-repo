@@ -18,9 +18,9 @@ File { backup => false }
 # If no role is defined, apply the role::base role class as fallback
 if $trusted['extensions']['pp_role'] {
   # for now, use PE classifier node groups to include role classes
-  include role::${trusted['extensions']['pp_role']}
+  include "role::${trusted['extensions']['pp_role']}"
 } else {
-  include role::base
+  include 'role::base'
 }
 
 ## Node Definitions ##

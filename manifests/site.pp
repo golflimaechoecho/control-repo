@@ -13,6 +13,16 @@
 # https://github.com/puppetlabs/docs-archive/blob/master/pe/2015.3/release_notes.markdown#filebucket-resource-no-longer-created-by-default
 File { backup => false }
 
+# If pp_role is included in certificate trusted extensions, below could be uncommented to
+# include the corresponding role class (assumes the class has been created/is available to apply)
+# If no role is defined, apply the role::base role class as fallback
+if $trusted['extensions']['pp_role'] {
+  # for now, use PE classifier node groups to include role classes
+  # include role::${trusted['extensions']['pp_role']}
+} else {
+  include role::base
+}
+
 ## Node Definitions ##
 
 # The default node definition matches any node lacking a more specific node

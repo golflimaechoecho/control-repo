@@ -1,0 +1,3 @@
+---
+profile::test::vsphere_host: 'c7glagt1.platform9.puppet.net'
+profile::test::parameter: 'c7glagt1'

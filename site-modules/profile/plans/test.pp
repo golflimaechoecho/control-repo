@@ -1,6 +1,6 @@
 plan profile::test (
   TargetSpec $targets,
-  Optional[String[1]] $parameter,
+  Optional[String[1]] $parameter = lookup('profile::test::parameter', { 'default_value' => undef }),
 ) {
   #run_task(facter_task, $targets, '_catch_errors' => true)
   get_targets($targets).each | $target | {

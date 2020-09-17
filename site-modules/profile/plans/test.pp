@@ -1,14 +1,11 @@
 plan profile::test (
   TargetSpec $targets,
+  Optional[String[1]] $parameter,
 ) {
   #run_task(facter_task, $targets, '_catch_errors' => true)
   get_targets($targets).each | $target | {
-    $target_old_uri = $target.uri
-    run_command("echo 'uri for ${target}: ${target_old_uri}'", $target)
-    $uri_upcase = upcase($target.uri)
-    $target.set_var('uri', $uri_upcase)
-    $target_new_uri = $target.uri
-    run_command("echo 'updated vars for ${target}: ${target_new_uri}'", $target)
+    $vsphere_host = lookup('profile::test::vsphere_host')
+    run_command("echo parameter is ${parameter}, vsphere host is ${vsphere_host}", $target)
   }
   #run_plan(facts, targets => $targets)
 }

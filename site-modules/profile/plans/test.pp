@@ -14,7 +14,8 @@ plan profile::test (
     notify { "echo parameter is ${parameter}, _parameter is ${_parameter}, vsphere host is ${vsphere_host}": }
   }
   $results.each | $result | {
-    out::message($result.report)
+    $report = $result.report
+    out::message("report is $report")
   }
   return()
 }

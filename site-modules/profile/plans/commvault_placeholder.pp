@@ -15,8 +15,13 @@
 # @param api_password
 #   password to access CommVault API
 #
+# @param String[1] pe_server
+#   the API calls to commvault are made from the PE server not the targets themselves
+#   Default to the certname of the PE server, parameterising to allow testing
+#
 plan profile::commvault_placeholder (
   TargetSpec $targets,
+  String[1] $pe_server = "dccvmscmmaster01.w2k.bnm.gov.my",
   Optional[String[1]] $commvault_api_server = 'dccebrssq01.w2k.bnm.gov.my',
   Optional[Integer[0, 65535]] $commvault_api_port = 81,
   String[1] $api_user = 'puppetadm',
@@ -25,8 +30,6 @@ plan profile::commvault_placeholder (
   # placeholder for commvault
   out::message("Placeholder: Run commvault backup")
 
-  # this plan is slightly different as the API calls will be made from the PE server not the targets
-  $pe_server = "dccvmscmmaster01.w2k.bnm.gov.my"
 
   $baseurl = "http://${commvault_api_server}:${commvault_api_port}/SearchSvc/CVWebService.svc"
   $content_type = '"Content-Type: application/xml"'

@@ -87,7 +87,9 @@ plan profile::patch_workflow (
 ) {
   # Collect facts
   # note: facts plan fails on AIX, appears this is due to user facts from hardening/os_hardening
-  run_plan(facts, targets => $targets, '_catch_errors' => true)
+  without_default_logging() || {
+    run_plan(facts, targets => $targets, '_catch_errors' => true)
+  }
 
   $windows_targets = get_targets($targets).filter | $target | {
     $target.facts['os']['family'] == 'windows'

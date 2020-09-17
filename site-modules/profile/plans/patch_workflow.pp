@@ -239,14 +239,18 @@ plan profile::patch_workflow (
     # if any of these are non-empty, add to results (if all are empty this means no changes)
     $memotype = type($memo)
     out::message("memo is ${memo} and type is ${memotype}")
-    unless ( $changed_post_patch.empty and $missing_post_patch.empty and $new_post_patch.empty ) {
-      $memo + { $target_name => {
-                  'changed_post_patch' => $changed_post_patch,
-                  'absent_post_patch'  => $missing_post_patch,
-                  'new_post_patch'     => $new_post_patch,
-                }
-              }
+    if ( $changed_post_patch.empty and $missing_post_patch.empty and $new_post_patch.empty ) {
+      # if there are no changes don't add anything
+      $target_change_hash = {}
+    } else {
+      $target_change_hash = { $target_name => {
+                                'changed_post_patch' => $changed_post_patch,
+                                'absent_post_patch'  => $missing_post_patch,
+                                'new_post_patch'     => $new_post_patch,
+                              }
+                            }
     }
+    $memo + $target_change_hash
   }
 
   # hash of changes to return

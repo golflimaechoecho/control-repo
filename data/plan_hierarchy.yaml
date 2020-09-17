@@ -1,3 +1,0 @@
----
-profile::test::vsphere_host: 'plan.platform9.puppet.net'
-profile::test::parameter: 'plan'

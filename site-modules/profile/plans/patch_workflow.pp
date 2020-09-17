@@ -89,6 +89,18 @@ plan profile::patch_workflow (
   # note: facts plan fails on AIX, appears this is due to user facts from hardening/os_hardening
   run_plan(facts, targets => $targets, '_catch_errors' => true)
 
+  $windows_targets = get_targets($targets).filter | $target | {
+    $target.facts['os']['family'] == 'windows'
+  }
+
+  $redhat_targets = get_targets($targets).filter | $target | {
+    $target.facts['os']['family'] == 'RedHat'
+  }
+
+  $physical_targets = get_targets($targets).filter | $target | {
+    $target.facts['is_virtual'] == false
+  }
+
   # Commvault backup placeholder
   # where specified by parameter or physical hosts ($facts['is_virtual'] == false)
   $commvault_targets = get_targets($targets).filter | $target | {
@@ -114,6 +126,9 @@ plan profile::patch_workflow (
   # run respective snapshot/backups based on commvault/nutanix/vmware
   # unless we have specified to skip backup ($perform_backup == false)
   if $perform_backup {
+    if ! get_targets($physical_targets).empty {
+      run_plan('profile::rhel_physical_backup_placeholder', targets => $physical_targets)
+    }
     if ! get_targets($commvault_targets).empty {
       run_plan('profile::commvault_placeholder', targets => $commvault_targets)
     }
@@ -160,6 +175,14 @@ plan profile::patch_workflow (
     out::message("Backup/snapshot not run as perform_backup set to ${perform_backup}")
   }
 
+  # After snapshot/backup, before reboot
+
+  # Windows: remove tmpfiles - set noop true for now as still testing
+  if ! get_targets($windows_targets).empty {
+    out::message("Windows: recursively remove *.tmp files")
+    run_plan('profile::windows_tidy_tmpfiles', $windows_targets, noop => true, '_catch_errors' => true)
+  }
+
   if $perform_reboot and ( ! $dry_run ) {
     run_plan('reboot', targets => $targets, reconnect_timeout => $reconnect_timeout)
   } else {
@@ -175,6 +198,9 @@ plan profile::patch_workflow (
   } else {
     $patch_result = run_task('pe_patch::patch_server', $targets, reboot => 'patched')
   }
+
+  # Post-patch
+  run_plan('profile::copy_eventlog_placeholder' $windows_targets, '_catch_errors' => true)
 
   $services_after_patching = without_default_logging() || {
     run_task('profile::check_services', $targets, '_catch_errors' => true)

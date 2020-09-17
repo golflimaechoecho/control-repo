@@ -1,0 +1,28 @@
+{
+  "input_method": "environment",
+  "parameters": {
+    "local_backup_path": {
+      "description": "Location/path to write local backup eg: /opt",
+      "type": "Pattern[/\\A\\/([^\\n\\/\\0]+\\/*)*\\z/]"
+    },
+    "noop": {
+      "description": "Parameter to set noop",
+      "type": Boolean
+    },
+    "remote_dir": {
+      "description": "Location/path to copy backup on remote host eg: /opt/simpana",
+      "type": "Optional[Pattern[/\\A\\/([^\\n\\/\\0]+\\/*)*\\z/]]"
+    },
+    "remote_host": {
+      "description": "Remote host to copy backup",
+      "type": "String[1]"
+    },
+    "remote_user": {
+      "description": "Remote user for backup copy eg: pmadmin1",
+      "type": "Optional[String[1]]"
+    }
+  },
+  "puppet_task_version": 1,
+  "supports_noop": true,
+  "description": "Placeholder: Perform physical backup for RHEL host"
+}

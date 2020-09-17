@@ -3,9 +3,9 @@ plan profile::test (
   Optional[String[1]] $parameter = lookup('profile::test::parameter', { 'default_value' => undef }),
 ) {
   #run_task(facter_task, $targets, '_catch_errors' => true)
-  get_targets($targets).each | $target | {
+  apply($targets)
     $vsphere_host = lookup('profile::test::vsphere_host')
-    run_command("echo parameter is ${parameter}, vsphere host is ${vsphere_host}", $target)
+    notify { "echo parameter is ${parameter}, vsphere host is ${vsphere_host}": }
   }
   #run_plan(facts, targets => $targets)
 }

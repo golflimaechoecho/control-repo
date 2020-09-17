@@ -200,7 +200,7 @@ plan profile::patch_workflow (
   }
 
   # Post-patch
-  run_plan('profile::copy_eventlog_placeholder' $windows_targets, '_catch_errors' => true)
+  run_plan('profile::copy_eventlog_placeholder', targets => $windows_targets, '_catch_errors' => true)
 
   $services_after_patching = without_default_logging() || {
     run_task('profile::check_services', $targets, '_catch_errors' => true)

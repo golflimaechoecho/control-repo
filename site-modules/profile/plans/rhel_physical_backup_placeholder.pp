@@ -11,5 +11,5 @@ plan profile::rhel_physical_backup_placeholder (
   out::message("Placeholder for rhel physical backup")
 
   # run in noop for now pending testing of task
-  run_task('profile::rhel_physical_backup', $redhat_targets, remote_host => 'DCCEBRSMA05', noop => true, '_catch_errors' => true)
+  run_task('profile::rhel_physical_backup', $redhat_targets, local_backup_path => '/opt', remote_host => 'DCCEBRSMA05', noop => true, '_catch_errors' => true)
 }

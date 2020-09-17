@@ -1,4 +1,4 @@
-# @placeholder for nutanix snapshot pending further details
+# @summary placeholder for nutanix snapshot pending further details
 plan profile::nutanix_placeholder (
   TargetSpec $controller_vm,
   TargetSpec $targetvm,

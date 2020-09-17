@@ -40,14 +40,11 @@ plan profile::commvault_placeholder (
   # target is PE server
   $login_results = run_command($login_command, $pe_server, '_catch_errors' => true)
 
-  $login_results.each | $login_result | {
-    out::message("login result is ${login_result}")
-  }
-
-  # assume we can get $authtoken from above result
-  # authtoken expires after 30 minutes (ie: we're assuming we can complete in that time)
-  $token = 'QSDK placeholder'
+  # there should only be one result; get token field
+  # note authtoken expires after 30 minutes (ie: we're assuming we can complete in that time)
+  $token = $login_results[0]['token']
   $authtoken = "Authtoken: ${token}"
+  out::message("authtoken is ${authtoken}")
 
   $targets.get_targets().each | $target | {
     $target_name = $target.name

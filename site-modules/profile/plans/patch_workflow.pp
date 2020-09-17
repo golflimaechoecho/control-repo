@@ -237,6 +237,7 @@ plan profile::patch_workflow (
     #}
 
     # if any of these are non-empty, add to results (if all are empty this means no changes)
+    out::message("memo is ${memo} and type is type($memo)")
     unless ( $changed_post_patch.empty and $missing_post_patch.empty and $new_post_patch.empty ) {
       $memo + { $target_name => {
                   'changed_post_patch' => $changed_post_patch,

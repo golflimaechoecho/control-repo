@@ -127,8 +127,11 @@ plan profile::commvault_placeholder (
     if $fs_subclients.empty {
       out::message("WARNING: could not find subclient id to perform backup")
     } else {
-      $subclient_id = $fs_subclients['0']['subClientEntity']['subclientId']
-      out::message("subclient id is ${subclient_id}")
+      $fs_subclients.each | $sub | {
+        out::message("subclient contents: ${sub}")
+      }
+      #$subclient_id = $fs_subclients['subClientEntity']['subclientId']
+      #out::message("subclient id is ${subclient_id}")
     }
 
     $inititate_backup_command = "${curl_cmd} -X POST ${baseurl}/Subclient/${subclient_id}/action/backup -H ${content_type} -H ${accept} -H ${authtoken}"

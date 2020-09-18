@@ -18,7 +18,7 @@ class profile::windows::installedkb {
 
   # RedHat, AIX should also set mode, owner, group; Windows doesn't care as much
   file { 'installedkb_externalfact':
-    ensure => file,
+    ensure => absent,
     path   => "${extfactdir}/${factfile}",
     source => "puppet:///modules/${module_name}/${factfile}",
   }

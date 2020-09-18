@@ -127,7 +127,7 @@ plan profile::commvault_placeholder (
     if $fs_subclients.empty {
       out::message("WARNING: could not find subclient id to perform backup")
     } else {
-      $subclient_id = $fs_subclients['subClientEntity']['subclientId']
+      $subclient_id = $fs_subclients['0']['subClientEntity']['subclientId']
       out::message("subclient id is ${subclient_id}")
     }
 

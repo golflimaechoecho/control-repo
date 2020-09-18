@@ -61,9 +61,9 @@ plan profile::commvault_placeholder (
 
     # does commvault need the shortname? yes
     # plus physicals are prefixed with '3' eg: '3dccappfunction'
-    $target_shortname = regsubst($target_name.uri, '^([^.]+).*','\1')
+    $target_shortname = regsubst($target_name, '^([^.]+).*','\1')
 
-    $client_id_command = "${curl_cmd} -X GET ${baseurl}/GetId?clientName=${target_name} -H ${accept} -H ${authtoken}"
+    $client_id_command = "${curl_cmd} -X GET ${baseurl}/GetId?clientName=${target_shortname} -H ${accept} -H ${authtoken}"
     out::message($client_id_command)
 
     #$client_id_results = run_command($client_id_command, $api_initiator, '_catch_errors' => true)

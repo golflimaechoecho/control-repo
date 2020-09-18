@@ -48,7 +48,7 @@ plan profile::commvault_placeholder (
   # there should only be one result; get token field
   # note authtoken expires after 30 minutes (ie: we're assuming we can complete in that time)
   $token = $login_results.to_data.each | $r | {
-    out::message("token is $r['value']['stdout']['token']")
+    out::message($r['value']['stdout']['token'])
   }
   $authtoken = "\"Authtoken: ${token}\""
   out::message("authtoken is ${authtoken}")

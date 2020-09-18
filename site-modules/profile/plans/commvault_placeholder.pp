@@ -129,7 +129,7 @@ plan profile::commvault_placeholder (
     } else {
       $subtype = type($fs_subclients)
       out::message("subtype is $subtype")
-      out::message("subclient 0: $fs_subclients[0]")
+      out::message("subclient 0 0: $fs_subclients[0][0]")
       $subclient_id = $fs_subclients[0]['subClientEntity']['subclientId']
       #out::message("subclient id is ${subclient_id}")
     }

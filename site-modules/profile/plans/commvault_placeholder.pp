@@ -34,6 +34,7 @@ plan profile::commvault_placeholder (
   $baseurl = "http://${commvault_api_server}:${commvault_api_port}/SearchSvc/CVWebService.svc"
   $content_type = '"Content-Type: application/xml"'
   $accept = '"Accept: application/json"'
+  $curl_cmd = "curl -S" # show errors, hide progress bar
 
   $login_data = "'<DM2ContentIndexing_CheckCredentialReq mode=\"Webconsole\" username=\"${api_user}\" password=\"${api_password}\" />'"
 
@@ -41,26 +42,27 @@ plan profile::commvault_placeholder (
   out::message($login_command)
 
   # target is PE server
-  $login_results = run_command($login_command, $pe_server, '_catch_errors' => true)
+  #$login_results = run_command($login_command, $pe_server, '_catch_errors' => true)
+  $login_results = run_command('cat /var/tmp/stdout.txt', $pe_server, '_catch_errors' => true)
 
   # there should only be one result; get token field
   # note authtoken expires after 30 minutes (ie: we're assuming we can complete in that time)
-  $token = $login_results[0]['token']
-  $authtoken = "Authtoken: ${token}"
+  $token = $login_results.to_data[0]['result']['stdout']['token']
+  $authtoken = "\"Authtoken: ${token}\""
   out::message("authtoken is ${authtoken}")
 
   $targets.get_targets().each | $target | {
     $target_name = $target.name
 
-    # does commvault need the shortname?
+    # does commvault need the shortname? yes. and physicals are prefixed with '3' eg: '3dcchostname'
 
     $client_id_command = "curl -X GET ${baseurl}/GetId?clientName=${target_name} -H ${accept} -H ${authtoken}"
     out::message($client_id_command)
 
     #$client_id_results = run_command($client_id_command, $pe_server, '_catch_errors' => true)
 
-    #$client_id = $client_id_results[0].blah
-    $client_id = '1234'
+    $client_id = $client_id_results[0]['blah']
+    out::message($client_id)
 
     $job_id_command = "curl -X GET ${baseurl}/Job?clientId=${client_id} -H ${accept} -H ${authtoken}"
     out::message($job_id_command)

@@ -1,7 +1,6 @@
 #!/opt/puppetlabs/puppet/bin/ruby
 # List members of Administrators group on Windows
 require 'rbconfig'
-require 'json'
 require 'yaml'
 require 'open3'
 
@@ -11,8 +10,8 @@ if (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
   #puppet_cmd = "#{ENV['programfiles']}/Puppet Labs/Puppet/bin/puppet"
   puppet_cmd = 'puppet'
   members_stdout, stderr, status = Open3.capture3("#{puppet_cmd} resource group Administrators --to_yaml")
-  members_json = JSON.parse(JSON.generate(YAML.load(members_stdout)))
-  puts members_json['group']['Administrators']['members']
+  members_hash = YAML.load(members_stdout)
+  puts members_hash['group']['Administrators']['members']
 else
   puts 'This task is only supported on Windows'
 end

@@ -74,7 +74,7 @@ plan profile::commvault_placeholder (
     out::message("client id is ${client_id}")
 
     $job_command = "${curl_cmd} -X GET ${baseurl}/Job?clientId=${client_id} -H ${accept} -H ${authtoken}"
-    out::message($job_id_command)
+    out::message($job_command)
     #$job_results = run_command($job_command, $api_initiator, '_catch_errors' => true)
     $job_results = run_command('cat /var/tmp/commvault_getjoblist.json', $api_initiator, '_catch_errors' => true)
 

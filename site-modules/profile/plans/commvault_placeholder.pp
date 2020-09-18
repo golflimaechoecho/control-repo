@@ -67,7 +67,7 @@ plan profile::commvault_placeholder (
     out::message($client_id_command)
 
     #$client_id_results = run_command($client_id_command, $api_initiator, '_catch_errors' => true)
-    $client_id_results = run_command('cat /var/tmp/clientid.out' $api_initiator, '_catch_errors' => true)
+    $client_id_results = run_command('cat /var/tmp/clientid.out', $api_initiator, '_catch_errors' => true)
     $client_id_result_data = $client_id_results.first.to_data
     $client_id_result_stdout = parsejson($client_id_result_data['value']['stdout'])
     $client_id = $client_id_result_stdout['clientId']

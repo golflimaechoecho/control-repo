@@ -71,7 +71,7 @@ plan profile::commvault_placeholder (
     $client_id_result_data = $client_id_results.first.to_data
     $client_id_result_stdout = parsejson($client_id_result_data['value']['stdout'])
     $client_id = $client_id_result_stdout['clientId']
-    out::message($client_id)
+    out::message("client id is ${client_id}")
 
     $job_command = "${curl_cmd} -X GET ${baseurl}/Job?clientId=${client_id} -H ${accept} -H ${authtoken}"
     out::message($job_id_command)

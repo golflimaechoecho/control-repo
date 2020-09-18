@@ -16,6 +16,7 @@ if (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
   members_json['group']['Administrators'].each do | member |
     member_list.push(member)
   end
+  puts member_list
 else
   puts 'This task is only supported on Windows'
 end

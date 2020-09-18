@@ -8,6 +8,7 @@ plan profile::test (
 ) {
   #run_task(facter_task, $targets, '_catch_errors' => true)
   #run_plan(facts, targets => $targets)
+  apply_prep($targets)
   $results = apply($targets) {
     $_parameter = lookup('profile::test::parameter', { 'default_value' => undef })
     $vsphere_host = lookup('profile::test::vsphere_host')
@@ -17,7 +18,8 @@ plan profile::test (
     $report = $result.report['resource_statuses']
     out::message("report is $report")
   }
-  apply($targets) {
+
+  return(apply($targets) {
     $user = 'cccsdp'
     $group = 'Administrators'
     user { $user:
@@ -30,5 +32,5 @@ plan profile::test (
       auth_membership => false,
     }
   }
-  return()
+  )
 }

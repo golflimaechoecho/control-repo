@@ -48,8 +48,7 @@ plan profile::commvault_placeholder (
   # there should only be one result; get token field
   # note authtoken expires after 30 minutes (ie: we're assuming we can complete in that time)
   $login_result_hash = $login_results.find($pe_server).to_data
-  out::message("result hash value: $login_result_hash['value']")
-  $token = $login_result_hash['value']['stdout']['token']
+  $token = Stdlib::parsejson($login_result_hash['value']['stdout'])['token']
   $authtoken = "\"Authtoken: ${token}\""
   out::message("authtoken is ${authtoken}")
 

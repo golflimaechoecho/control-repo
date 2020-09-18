@@ -129,8 +129,8 @@ plan profile::commvault_placeholder (
     } else {
       $firstfs = $fs_subclients[0]
       out::message("subtype is $firstfs")
-      $subclient_id = $fs_subclients[0]['subClientEntity']['subclientId']
-      #out::message("subclient id is ${subclient_id}")
+      $subclient_id = $firstfs['subClientEntity']['subclientId']
+      out::message("subclient id is ${subclient_id}")
     }
 
     $inititate_backup_command = "${curl_cmd} -X POST ${baseurl}/Subclient/${subclient_id}/action/backup -H ${content_type} -H ${accept} -H ${authtoken}"

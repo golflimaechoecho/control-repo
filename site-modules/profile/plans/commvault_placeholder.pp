@@ -133,7 +133,7 @@ plan profile::commvault_placeholder (
       out::message("subclient id is ${subclient_id}")
     }
 
-    $inititate_backup_command = "${curl_cmd} -X POST ${baseurl}/Subclient/${subclient_id}/action/backup -H ${content_type} -H ${accept} -H ${authtoken}"
+    $initiate_backup_command = "${curl_cmd} -X POST ${baseurl}/Subclient/${subclient_id}/action/backup -H ${content_type} -H ${accept} -H ${authtoken}"
     out::message("Inititate backup command: ${initiate_backup_command}")
     #$initiate_backup_result = run_command($initiate_backup_command, $api_initiator, '_catch_errors' => true)
   }

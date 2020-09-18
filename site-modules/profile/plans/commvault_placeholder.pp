@@ -68,15 +68,15 @@ plan profile::commvault_placeholder (
 
     #$client_id_results = run_command($client_id_command, $api_initiator, '_catch_errors' => true)
     $client_id_results = run_command('cat /var/tmp/clientid.out' $api_initiator, '_catch_errors' => true)
-    $client_result_data = $client_results.first.to_data
-    $client_result_stdout = parsejson($client_result_data['value']['stdout'])
-    $client_id = $client_id_stdout['clientId']
+    $client_id_result_data = $client_id_results.first.to_data
+    $client_id_result_stdout = parsejson($client_id_result_data['value']['stdout'])
+    $client_id = $client_id_result_stdout['clientId']
     out::message($client_id)
 
-    $job_id_command = "${curl_cmd} -X GET ${baseurl}/Job?clientId=${client_id} -H ${accept} -H ${authtoken}"
+    $job_command = "${curl_cmd} -X GET ${baseurl}/Job?clientId=${client_id} -H ${accept} -H ${authtoken}"
     out::message($job_id_command)
-    #$job_id_results = run_command($job_id_command, $api_initiator, '_catch_errors' => true)
-    $job_id_results = run_command('cat /var/tmp/commvault_getjoblist.json', $api_initiator, '_catch_errors' => true)
+    #$job_results = run_command($job_command, $api_initiator, '_catch_errors' => true)
+    $job_results = run_command('cat /var/tmp/commvault_getjoblist.json', $api_initiator, '_catch_errors' => true)
 
     # native output is jobs as array of hashes?
     # { jobs => [ { jobSummary => {}, jobSummary => {}, [...] } ]

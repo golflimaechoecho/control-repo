@@ -65,6 +65,16 @@ plan profile::commvault_placeholder (
     $job_id_command = "curl -X GET ${baseurl}/Job?clientId=${client_id} -H ${accept} -H ${authtoken}"
     out::message($job_id_command)
     #$job_id_results = run_command($job_id_command, $pe_server, '_catch_errors' => true)
+    # native output is jobs as array of hashes?
+    # { jobs => [ { jobSummary => {}, jobSummary => {}, [...] } ]
+
+    $subclient_command = "curl -X GET ${baseurl}/Subclient?clientId=${client_id} -H ${accept} -H ${authtoken}"
+
+    # (look for the subclient id of "appName":"File System" "appName":"File System","backupsetName":"defaultBackupSet","subclientName":"default")
+
+    #$subclient_id = $subclient_command_results[0].blah
+
+    $inititate_backup_command = "curl -X POST ${baseurl}/Subclient/${subclient_id}/action/backup -H ${content_type} -H ${accept} -H ${authtoken}"
   }
 
   return()

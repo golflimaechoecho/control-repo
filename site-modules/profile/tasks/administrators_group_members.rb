@@ -13,7 +13,7 @@ if (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
   member_list = []
   members_stdout, stderr, status = Open3.capture3("#{puppet_cmd} resource group Administrators --to_yaml")
   members_json = JSON.parse(JSON.generate(YAML.load(members_stdout)))
-  members_json['group']['Administrators'].each do | member |
+  members_json['group']['Administrators']['members'].each do | member |
     member_list.push(member)
   end
   puts member_list

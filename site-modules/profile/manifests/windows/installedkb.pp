@@ -20,6 +20,5 @@ class profile::windows::installedkb {
   file { 'installedkb_externalfact':
     ensure => absent,
     path   => "${extfactdir}/${factfile}",
-    source => "puppet:///modules/${module_name}/${factfile}",
   }
 }

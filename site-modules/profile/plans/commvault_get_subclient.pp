@@ -1,14 +1,12 @@
-# @summary get commvault client ID
-#
-# Note token expires after 30 minutes
+# @summary get commvault subclient details
 #
 # requires parsejson() from puppetlabs/stdlib to parse the json returned by API
 #
-# @param [TargetSpec] target
-#   Target to run the login from (at the time of writing this is the PE server)
+# @param [TargetSpec] targets
+#   Targets to query backup for
 #
-# @param String[1] commvault_client_name
-#   commvault client name to query
+# @param Integer[0] commvault_client_id
+#   commvault client id to query
 #
 # @param [Optional[String[1]]] commvault_api_server
 #   Hostname/FQDN of the CommVault API server
@@ -29,19 +27,15 @@
 # @param Optional[String[1]] token
 #   An existing token (if available). Defaults to undef (ie: will generate new token)
 #
-# @param Boolean dry_run
-#   Whether this is a dry_run. Defaults to false.
-#
-plan profile::commvault_client_id (
+plan profile::commvault_get_subclient (
   TargetSpec $targets,
-  String[1] $commvault_client_name,
   String[1] $api_initiator = "dccvmscmmaster01.w2k.bnm.gov.my",
   Optional[String[1]] $commvault_api_server = 'dccebrssq01.w2k.bnm.gov.my',
   Optional[Integer[0, 65535]] $commvault_api_port = 81,
   String[1] $api_user = 'puppetadm',
   String[1] $api_password = 'Qm5tQDIwMjA=',
   Optional[String[1]] $token = undef,
-  Boolean $dry_run = false,
+  Integer[0] $commvault_client_id,
 ) {
   $baseurl = "http://${commvault_api_server}:${commvault_api_port}/SearchSvc/CVWebService.svc"
   $content_type = '"Content-Type: application/xml"'
@@ -65,10 +59,8 @@ plan profile::commvault_client_id (
     $authtoken = "\"Authtoken: ${token}\""
   }
 
-  $client_id_command = "${curl_cmd} -X GET ${baseurl}/GetId?clientName=${commvault_client_name} -H ${accept} -H ${authtoken}"
-  out::message($client_id_command)
-
-  # target is PE server
-  #return(run_command($client_id_command, $api_initiator, '_catch_errors' => true))
-  return(run_command('cat /var/tmp/clientid.out', $api_initiator, '_catch_errors' => true))
+  $subclient_id_command = "${curl_cmd} -X GET ${baseurl}/Subclient?clientId=${client_id} -H ${accept} -H ${authtoken}"
+  out::message($subclient_id_command)
+  return(run_command('cat /var/tmp/subclient.json', $api_initiator, '_catch_errors' => true))
+  }
 }

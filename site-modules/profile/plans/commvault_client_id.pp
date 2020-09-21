@@ -50,7 +50,7 @@ plan profile::commvault_client_id (
 
   if $token == undef {
     out::message("No token provided, generating new")
-    $login_results = run_plan('profile::commvault_login', $api_initiator, '_catch_errors' => true)
+    $login_results = run_plan('profile::commvault_login', $api_initiator, api_initiator => $api_initiator, '_catch_errors' => true)
 
     # note authtoken expires after 30 minutes (ie: below assumes we can complete in that time)
     # API returns JSON string to stdout

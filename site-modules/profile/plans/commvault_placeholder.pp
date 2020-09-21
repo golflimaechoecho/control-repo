@@ -36,6 +36,10 @@ plan profile::commvault_placeholder (
   # placeholder for commvault
   out::message("Placeholder: Run commvault backup")
 
+  without_default_logging() || {
+    run_plan(facts, targets => $targets, '_catch_errors' => true)
+  }
+
   $baseurl = "http://${commvault_api_server}:${commvault_api_port}/SearchSvc/CVWebService.svc"
   $content_type = '"Content-Type: application/xml"'
   $accept = '"Accept: application/json"'

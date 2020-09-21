@@ -42,7 +42,7 @@ plan profile::commvault_placeholder (
   $curl_cmd = "curl -S" # show errors, hide progress bar
 
   # target is PE server
-  $login_results = run_plan('profile::commvault_login', $api_initiator, '_catch_errors' => true)
+  $login_results = run_plan('profile::commvault_login', $api_initiator, api_initiator => $api_initiator, '_catch_errors' => true)
 
   # note authtoken expires after 30 minutes (ie: below assumes we can complete in that time)
   # API returns JSON string to stdout
@@ -73,7 +73,7 @@ plan profile::commvault_placeholder (
     $client_id = $client_id_result_stdout['clientId']
     out::message("client id is ${client_id}")
 
-    $job_results = run_plan('profile::commvault_get_jobs', $api_initiator, api_initiator => $api_initiator, commvault_client_id => $client_id, '_catch_errors' => true)
+    $job_results = run_plan('profile::commvault_get_jobs', $api_initiator, api_initiator => $api_initiator, commvault_client_id => $client_id, token => $token, '_catch_errors' => true)
 
     # native output is jobs as array of hashes?
     # { jobs => [ { jobSummary => {}, jobSummary => {}, [...] } ]
@@ -98,7 +98,7 @@ plan profile::commvault_placeholder (
 
     if $within_acceptable_time.empty {
       out::message("WARNING: No backups within last ${acceptable_time} seconds")
-      $subclient_id_results = run_plan('profile::commvault_get_subclient', $api_initiator, api_initiator => $api_initiator, commvault_client_id => $client_id, '_catch_errors' => true)
+      $subclient_id_results = run_plan('profile::commvault_get_subclient', $api_initiator, api_initiator => $api_initiator, commvault_client_id => $client_id, token => $token, '_catch_errors' => true)
 
       # (look for the subclient id of "appName":"File System" "appName":"File System","backupsetName":"defaultBackupSet","subclientName":"default")
 
@@ -120,14 +120,9 @@ plan profile::commvault_placeholder (
         out::message("subclient id is ${subclient_id}")
       }
 
-      $initiate_backup_command = "${curl_cmd} -X POST ${baseurl}/Subclient/${subclient_id}/action/backup -H ${content_type} -H ${accept} -H ${authtoken}"
-      if $dry_run {
-        out::message("Dry run: would have attempted to initiate backup with ${initiate_backup_command}")
-      } else {
-        $initiate_backup_result = run_command($initiate_backup_command, $api_initiator, '_catch_errors' => true)
-        out::message("initiate backup result: ${initiate_backup_result}")
-      }
-
+      $initiate_backup_result = run_plan('profile::commvault_initiate_backup', $api_initiator, api_initiator => $api_initiator, commvault_subclient_id => $subclient_id, token => $token, dry_run => $dry_run, '_catch_errors' => true)
+      out::message("initiate backup result: ${initiate_backup_result}")
+      fail_plan("Backup inititated; failing plan to allow backup to run. Rerun after confirming backup complete")
     } else {
       out::message("Recent backups found, continue")
     }

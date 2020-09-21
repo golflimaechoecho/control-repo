@@ -59,8 +59,7 @@ plan profile::commvault_get_subclient (
     $authtoken = "\"Authtoken: ${token}\""
   }
 
-  $subclient_id_command = "${curl_cmd} -X GET ${baseurl}/Subclient?clientId=${client_id} -H ${accept} -H ${authtoken}"
+  $subclient_id_command = "${curl_cmd} -X GET ${baseurl}/Subclient?clientId=${commvault_client_id} -H ${accept} -H ${authtoken}"
   out::message($subclient_id_command)
   return(run_command('cat /var/tmp/subclient.json', $api_initiator, '_catch_errors' => true))
-  }
 }

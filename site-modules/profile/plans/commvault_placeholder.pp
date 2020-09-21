@@ -65,7 +65,7 @@ plan profile::commvault_placeholder (
 
     # client names for physicals are also prefixed with '3' eg: '3dccappfunction'
     #if $target.facts['is_virtual'] {
-    if $target.facts['os']['family'] == 'RedHat' {
+    if $target.facts['os']['family'] != 'RedHat' {
       $commvault_client_name = $target_shortname
     } else {
       $commvault_client_name = "3${target_shortname}"

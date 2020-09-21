@@ -59,9 +59,8 @@ plan profile::commvault_get_jobs (
     $authtoken = "\"Authtoken: ${token}\""
   }
 
-  $job_command = "${curl_cmd} -X GET ${baseurl}/Job?clientId=${client_id} -H ${accept} -H ${authtoken}"
+  $job_command = "${curl_cmd} -X GET ${baseurl}/Job?clientId=${commvault_client_id} -H ${accept} -H ${authtoken}"
   out::message($job_command)
   #return(run_command($job_command, $api_initiator, '_catch_errors' => true))
   return(run_command('cat /var/tmp/commvault_getjoblist.json', $api_initiator, '_catch_errors' => true))
-  }
 }

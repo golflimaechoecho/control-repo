@@ -32,7 +32,7 @@
 # @param Boolean dry_run
 #   Whether this is a dry_run. Defaults to false.
 #
-plan profile::commvault_login (
+plan profile::commvault_client_id (
   TargetSpec $targets,
   String[1] $commvault_client_name,
   String[1] $api_initiator = "dccvmscmmaster01.w2k.bnm.gov.my",

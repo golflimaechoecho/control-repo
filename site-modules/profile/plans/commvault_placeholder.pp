@@ -122,7 +122,14 @@ plan profile::commvault_placeholder (
 
       $initiate_backup_result = run_plan('profile::commvault_initiate_backup', $api_initiator, api_initiator => $api_initiator, commvault_subclient_id => $subclient_id, token => $token, dry_run => $dry_run, '_catch_errors' => true)
       out::message("initiate backup result: ${initiate_backup_result}")
-      fail_plan("Backup inititated; failing plan to allow backup to run. Rerun after confirming backup complete")
+
+      # At the time of writing, CBM still deciding what action to take if backup required
+      # For now, if we have to initiate a backup, fail the plan to give backup time to complete
+      # (in future could loop to query job status; if this takes hours it may be easier to rerun separately)
+      unless $dry_run {
+        # for now fail plan to give backup time to to run
+        fail_plan("Backup inititated; failing plan to allow backup to run. Rerun after confirming backup complete")
+      }
     } else {
       out::message("Recent backups found, continue")
     }

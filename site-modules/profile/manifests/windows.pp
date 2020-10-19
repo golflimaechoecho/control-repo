@@ -102,7 +102,7 @@ class profile::windows {
 
   $ieesc_registry_settings.each | String $keyname, Hash $keyattributes | {
     registry::value { $keyname:
-      notify => Exec[$rundll_execs],
+      notify => Exec['Rundll32 iesetup.dll,IEHardenAdmin'],
       *      => $keyattributes,
     }
   }

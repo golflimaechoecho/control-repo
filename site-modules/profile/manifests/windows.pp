@@ -67,7 +67,7 @@ class profile::windows {
   #     type: 'dword'
   #     data: 0
 
-  $registry_settings = {
+  $ieesc_registry_settings = {
     'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}\IsInstalled' => {
       key   => 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}',
       value => 'IsInstalled',
@@ -100,9 +100,21 @@ class profile::windows {
     }
   }
 
-  $registry_settings.each | String $keyname, Hash $keyattributes | {
+  $ieesc_registry_settings.each | String $keyname, Hash $keyattributes | {
     registry::value { $keyname:
-      * => $keyattributes,
+      notify => Exec[$rundll_execs],
+      *      => $keyattributes,
     }
+  }
+
+  $rundll_list = [ 'IEHardenUser', 'IEHardenAdmin', 'IEHardenMachineNow' ]
+
+  $rundll_execs = $rundll_list.map | String $toharden | {
+    "Rundll iesetup.dll,${toharden}"
+  }
+
+  # exec rundll only if ieesc registry keys changed
+  exec { $rundll_execs:
+    refreshonly => true,
   }
 }

@@ -115,6 +115,7 @@ class profile::windows {
 
   # exec rundll only if ieesc registry keys changed
   exec { $rundll_execs:
+    path        => 'C:/Windows/system32',
     refreshonly => true,
   }
 }

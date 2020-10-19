@@ -110,7 +110,7 @@ class profile::windows {
   $rundll_list = [ 'IEHardenUser', 'IEHardenAdmin', 'IEHardenMachineNow' ]
 
   $rundll_execs = $rundll_list.map | String $toharden | {
-    "Rundll iesetup.dll,${toharden}"
+    "Rundll32 iesetup.dll,${toharden}"
   }
 
   # exec rundll only if ieesc registry keys changed

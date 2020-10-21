@@ -67,43 +67,67 @@ class profile::windows {
   #     type: 'dword'
   #     data: 0
 
-  $ieesc_registry_settings = {
+  # IEESC settings have notify for Exec['Rundll32 iesetup.dll,IEHardenAdmin']
+  $registry_settings = {
     'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}\IsInstalled' => {
-      key   => 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}',
-      value => 'IsInstalled',
-      type  => 'dword',
-      data  => 1
+      key    => 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}',
+      value  => 'IsInstalled',
+      type   => 'dword',
+      data   => 1,
+      tag    => ['ieesc'],
+      notify => Exec['Rundll32 iesetup.dll,IEHardenAdmin'],
     },
     'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}\IsInstalled' => {
-      key   => 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}',
-      value => 'IsInstalled',
-      type  => 'dword',
-      data  => 1
+      key    => 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}',
+      value  => 'IsInstalled',
+      type   => 'dword',
+      data   => 1,
+      tag    => ['ieesc'],
+      notify => Exec['Rundll32 iesetup.dll,IEHardenAdmin'],
     },
     'HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432node\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}\IsInstalled' => {
-      key   =>  'HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432node\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}',
-      value => 'IsInstalled',
-      type  => 'dword',
-      data  => 1
+      key    =>  'HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432node\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}',
+      value  => 'IsInstalled',
+      type   => 'dword',
+      data   => 1,
+      tag    => ['ieesc'],
+      notify => Exec['Rundll32 iesetup.dll,IEHardenAdmin'],
     },
     'HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\IEHarden' => {
       key   => 'HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap',
       value => 'IEHarden',
       type  => 'dword',
-      data  => 1
+      data  => 1,
+      tag    => ['ieesc'],
+      notify => Exec['Rundll32 iesetup.dll,IEHardenAdmin'],
     },
     'HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\IEHarden' => {
-      key   => 'HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap',
-      value => 'IEHarden',
+      key    => 'HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap',
+      value  => 'IEHarden',
+      type   => 'dword',
+      data   => 1,
+      tag    => ['ieesc'],
+      notify => Exec['Rundll32 iesetup.dll,IEHardenAdmin'],
+    },
+    'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\Reliability\ShutdownReasonUI' => {
+      key   => 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\Reliability',
+      value => 'ShutdownReasonUI',
       type  => 'dword',
-      data  => 1
-    }
+      data  => 1, # to disable, ensure => absent; also check HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Reliability\
+      tag   => ['shutdown_event_tracker'],
+    },
+    'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\Reliability\ShutdownReasonOn' => {
+      key   => 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\Reliability',
+      value => 'ShutdownReasonOn',
+      type  => 'dword',
+      data  => 1, # to disable, set to 1
+      tag   => ['shutdown_event_tracker'],
+    },
   }
 
-  $ieesc_registry_settings.each | String $keyname, Hash $keyattributes | {
+  $registry_settings.each | String $keyname, Hash $keyattributes | {
     registry::value { $keyname:
-      notify => Exec['Rundll32 iesetup.dll,IEHardenAdmin'],
-      *      => $keyattributes,
+      * => $keyattributes,
     }
   }
 

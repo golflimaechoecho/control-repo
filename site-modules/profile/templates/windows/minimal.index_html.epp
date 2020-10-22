@@ -1,0 +1,6 @@
+<html>
+<title>minimal iis example</title>
+<body>
+<p>A minimal hello from <%= $facts[fqdn] %></p>
+</body>
+</html>

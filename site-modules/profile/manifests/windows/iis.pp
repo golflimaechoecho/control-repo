@@ -61,4 +61,9 @@ class profile::windows::iis {
       {'identity' => 'IIS_IUSRS', 'rights' => ['read', 'execute']},
     ],
   }
+
+  file { "${minimal_path}\\index.html":
+    ensure  => file,
+    content => epp('profile/windows/minimal.index_html.epp')
+  }
 }

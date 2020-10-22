@@ -34,6 +34,10 @@ mod 'tragiccode-wsusserver', '1.1.3'
 mod 'puppetlabs-wsus_client', '3.1.0'
 mod 'puppetlabs-registry', '3.1.1'
 
+# dsc_lite, iis
+mod 'puppetlabs-dsc_lite', '3.0.1'
+mod 'puppetlabs-iis', '7.1.0'
+
 #mod 'encore-patching', '1.1.1'
 mod 'encore-patching',
   :git => 'git@gl-gitlab.platform9.puppet.net:p9/fork-encore-patching.git',

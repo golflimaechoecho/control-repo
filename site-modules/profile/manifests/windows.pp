@@ -144,4 +144,10 @@ class profile::windows {
     path        => 'C:\\Windows\\system32',
     refreshonly => true,
   }
+
+  # reboot after 7zip installed
+  # Package['7zip'] is from archive module
+  reboot { 'post_7zip':
+    subscribe => Package['7zip'],
+  }
 }

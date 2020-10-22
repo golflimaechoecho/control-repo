@@ -43,3 +43,7 @@ message: "This node is using common data"
 wsus_client::server_url: 'http://w2016glwsus.platform9.puppet.net:8530'
 # default wsus_client target group to production if haven't found one by this point
 wsus_client::target_group: 'Production'
+
+# archive settings for 7-zip
+archive::seven_zip_source: 'https://www.7-zip.org/a/7z1900-x64.msi'
+archive::seven_zip_provider: 'windows'

@@ -14,7 +14,7 @@ class profile::base {
     'RedHat': {
     }
     'windows': {
-      include profile::windows::installedkb
+      include profile::windows
     }
     default: {
       fail("Unsupported OS: ${facts['os']['family']}")

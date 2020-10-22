@@ -38,6 +38,7 @@ mod 'puppetlabs-registry', '3.1.1'
 mod 'puppetlabs-dsc_lite', '3.0.1'
 mod 'puppetlabs-iis', '7.1.0'
 
+mod 'puppet-archive', '4.6.0'
 mod 'WhatsARanjit-node_manager', '0.7.3'
 
 #mod 'encore-patching', '1.1.1'

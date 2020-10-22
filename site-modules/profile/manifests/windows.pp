@@ -1,5 +1,6 @@
 # profile for windows
 class profile::windows {
+  include archive
   include profile::wsus_client
 
   $user  = 'gluser'

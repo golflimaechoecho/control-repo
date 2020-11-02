@@ -30,6 +30,7 @@ mod 'puppetlabs-acl', '3.2.0'
 # ca_extend testing
 mod 'puppetlabs-ca_extend', '1.1.1'
 
+# wsusserver, wsus_client testing
 mod 'tragiccode-wsusserver', '1.1.3'
 mod 'puppetlabs-wsus_client', '3.1.0'
 mod 'puppetlabs-registry', '3.1.1'

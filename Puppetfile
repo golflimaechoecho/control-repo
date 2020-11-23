@@ -42,6 +42,7 @@ mod 'puppetlabs-iis', '7.1.0'
 mod 'puppet-archive', '4.6.0'
 mod 'puppetlabs-chocolatey', '5.1.1'
 mod 'WhatsARanjit-node_manager', '0.7.3'
+mod 'jesse-pe_nc_backup', '1.0.2'
 
 #mod 'encore-patching', '1.1.1'
 mod 'encore-patching',

@@ -1,0 +1,4 @@
+---
+# plan_hierarchy hiera
+profile::test::vsphere_host: 'fallback.platform9.puppet.net'
+profile::test::parameter: %{facts.hostname}

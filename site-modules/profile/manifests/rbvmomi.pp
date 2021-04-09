@@ -25,6 +25,12 @@ class profile::rbvmomi {
     ;
     'rbvmomi':
       require => Package['nokogiri'],
+      notify  => Exec['restart pe-orchestration-services'],
     ;
+  }
+
+  exec { 'restart pe-orchestration-services':
+    command     => '/bin/systemctl restart pe-orchestration-services',
+    refreshonly => true,
   }
 }

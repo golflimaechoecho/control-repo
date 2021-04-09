@@ -16,4 +16,5 @@ hierarchy:
 
 plan_hierarchy:
   - name: fallback
+    data_hash: yaml_data
     path: plan_hierarchy.yaml

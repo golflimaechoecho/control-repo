@@ -2,7 +2,7 @@
 # intended to be applied on PE primary server
 # note: pe-orchestration-services must be restarted after installing gems
 class profile::rbvmomi {
-  $dep_gems = [ 'builder', 'json', 'mini_portile' ]
+  $dep_gems = [ 'builder', 'json', 'mini_portile2' ]
 
   # package dependencies for nokogiri native extension
   $dep_rpms = [ 'make', 'gcc', 'rpm-build', 'ruby-devel', 'zlib-devel' ]

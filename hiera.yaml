@@ -15,5 +15,5 @@ hierarchy:
       - "common.yaml"
 
 plan_hierarchy:
-  name: fallback
-  path: plan_hierarchy.yaml
+  - name: fallback
+    path: plan_hierarchy.yaml

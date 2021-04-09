@@ -18,13 +18,9 @@ class profile::rbvmomi {
     ;
     $dep_gems:
     ;
-    'nokogiri':
-      require => Package['make'],
-    ;
     # special case for nokogiri java extension
     # assumes file has been downloaded separately eg: gem fetch nokogiri --platform=java
-    'nokogiri-java':
-      name   => 'nokogiri',
+    'nokogiri':
       source => '/root/nokogiri-1.11.3-java.gem',
     ;
     'rbvmomi':

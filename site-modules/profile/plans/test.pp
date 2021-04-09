@@ -9,7 +9,7 @@ plan profile::test (
   #run_task(facter_task, $targets, '_catch_errors' => true)
   #run_plan(facts, targets => $targets)
   apply_prep($targets)
-  $parameter = lookup('profile::test::parameter', { 'default_value' => undef })
+  #$parameter = lookup('profile::test::parameter', { 'default_value' => undef })
   $results = apply($targets) {
     $_parameter = lookup('profile::test::parameter', { 'default_value' => undef })
     $vsphere_host = lookup('profile::test::vsphere_host')

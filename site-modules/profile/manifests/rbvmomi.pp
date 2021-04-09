@@ -1,5 +1,6 @@
 # class to install rbvmomi gem and dependencies
 # intended to be applied on PE primary server
+# note: pe-orchestration-services must be restarted after installing gems
 class profile::rbvmomi {
   $dep_gems = [ 'builder', 'json', 'mini_portile' ]
 

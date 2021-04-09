@@ -18,19 +18,4 @@ plan profile::test (
     $report = $result.report['resource_statuses']
     out::message("report is $report")
   }
-
-  return(apply($targets) {
-    $user = 'cccsdp'
-    $group = 'Administrators'
-    user { $user:
-      ensure     => present,
-      forcelocal => true,
-    }
-    group { $group:
-      ensure          => present,
-      members         => [$user],
-      auth_membership => false,
-    }
-  }
-  )
 }

@@ -24,7 +24,7 @@ class profile::rbvmomi {
       source => '/root/nokogiri-1.11.3-java.gem',
     ;
     'rbvmomi':
-      require => Package['nokogiri-java'],
+      require => Package['nokogiri'],
     ;
   }
 }

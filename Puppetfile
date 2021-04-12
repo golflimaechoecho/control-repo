@@ -56,6 +56,8 @@ mod 'puppetlabs-puppet_agent', '4.5.0'
 #  :branch => :control_branch,
 #  :default_branch => 'production'
 
+mod 'puppetlabs-patching_as_code', '0.5.0'
+
 mod 'telstra_patching',
   :git => 'git@github.com:golflimaechoecho/telstra_patching.git',
   :branch => :control_branch,

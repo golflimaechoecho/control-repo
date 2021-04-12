@@ -56,6 +56,11 @@ mod 'puppetlabs-puppet_agent', '4.5.0'
 #  :branch => :control_branch,
 #  :default_branch => 'production'
 
+mod 'telstra_patching',
+  :git => 'git@github.com:golflimaechoecho/telstra_patching.git',
+  :branch => :control_branch,
+  :default_branch => 'main'
+
 # Modules from Git
 # Examples: https://github.com/puppetlabs/r10k/blob/master/doc/puppetfile.mkd#examples
 #mod 'apache',

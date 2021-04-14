@@ -62,6 +62,43 @@ plan profile::auto_patch (
         $pre_update_done = $to_pre_update.ok_set.names
         $pre_update_failed = $to_pre_update.error_set.names
 
+        apply_prep($node_healthy)
+        $to_snapshot = apply($node_healthy, '_catch_errors' =>  true) {
+          $vsphere_servers = lookup('profile::pe_patch::vsphere_servers')
+          $vsphere_host = lookup('profile::pe_patch::vsphere_host')
+          if $vsphere_host in $vsphere_servers {
+            $node_healthy.each | $node | {
+              notify { [ $node,
+                                        'pe_patch_snapshot',
+                                        $vsphere_host,
+                                        $vsphere_servers[$vsphere_host][$vsphere_username],
+                                        $vsphere_servers[$vsphere_host][$vsphere_password],
+                                        $vsphere_servers[$vsphere_host][$vsphere_datacenter],
+                                        $vsphere_servers[$vsphere_host][$vsphere_insecure],
+                                        '',
+                                        false,
+                                        true,
+                                        'create' ]: }
+              patching::snapshot_vmware($node,
+                                        'pe_patch_snapshot',
+                                        $vsphere_host,
+                                        $vsphere_servers[$vsphere_host][$vsphere_username],
+                                        $vsphere_servers[$vsphere_host][$vsphere_password],
+                                        $vsphere_servers[$vsphere_host][$vsphere_datacenter],
+                                        $vsphere_servers[$vsphere_host][$vsphere_insecure],
+                                        '',
+                                        false,
+                                        true,
+                                        'create')
+            }
+          } else {
+            fail("Unable to find specified vsphere_host ${vsphere_host}")
+          }
+        }
+
+        $snapshot_done = $to_snapshot.ok_set.names
+        $snapshot_failed = $to_snapshot.error_set.names
+
         # Actually carry out the patching on all healthy nodes
         $to_patch = run_task('pe_patch::patch_server',
                               $pre_update_done,

@@ -1,41 +1,20 @@
 ---
+# Set lookup_options to define merge behaviour
+# https://puppet.com/docs/puppet/latest/hiera_merging.html#setting_lookup_options_to_refine_the_result_of_a_lookup
+lookup_options:
+  # FOR TESTING/EASE OF READING ONLY: hash merge patching_as_code::patch_schedule
+  # to inherit default schedule from module
+  # Normally would duplicate (copy/paste) schedule from module to common.yaml to reuse/customise as needed
+  patching_as_code::patch_schedule:
+    merge: hash
+
 # common hiera
 profile::test::vsphere_host: 'common.platform9.puppet.net'
 profile::test::parameter: "%{facts.hostname}"
 
 # list of ciphers from https://github.com/puppetlabs/puppet-enterprise-modules/blob/master/modules/puppet_enterprise/manifests/params.pp
 # Note https://puppet.com/docs/pe/2019.8/configuring_cipher_suites.html is misleading - IANA format does not appear to be acceptable for nginx
-puppet_enterprise::profile::console::proxy::ssl_ciphers:
-  - 'ECDHE-RSA-AES128-GCM-SHA256'
-  - 'ECDHE-ECDSA-AES128-GCM-SHA256'
-  - 'ECDHE-RSA-AES256-GCM-SHA384'
-  - 'ECDHE-ECDSA-AES256-GCM-SHA384'
-  - 'DHE-RSA-AES128-GCM-SHA256'
-  - 'DHE-DSS-AES128-GCM-SHA256'
-  - 'kEDH+AESGCM'
-  - 'ECDHE-RSA-AES128-SHA256'
-  - 'ECDHE-ECDSA-AES128-SHA256'
-  - 'ECDHE-ECDSA-AES128-SHA'
-  - 'ECDHE-RSA-AES256-SHA384'
-  - 'ECDHE-ECDSA-AES256-SHA384'
-  - 'ECDHE-ECDSA-AES256-SHA'
-  - 'DHE-RSA-AES128-SHA256'
-  - 'DHE-DSS-AES128-SHA256'
-  - 'DHE-RSA-AES256-SHA256'
-  - 'DHE-DSS-AES256-SHA'
-  - 'ECDHE-RSA-DES-CBC3-SHA'
-  - 'ECDHE-ECDSA-DES-CBC3-SHA'
-  - '!aNULL'
-  - '!eNULL'
-  - '!EXPORT'
-  - '!DES'
-  - '!RC4'
-  - '!MD5'
-  - '!PSK'
-  - '!aECDH'
-  - '!EDH-DSS-DES-CBC3-SHA'
-  - '!EDH-RSA-DES-CBC3-SHA'
-  - '!KRB5-DES-CBC3-SHA'
+#puppet_enterprise::profile::console::proxy::ssl_ciphers:
 
 message: "This node is using common data"
 
@@ -43,3 +22,69 @@ message: "This node is using common data"
 wsus_client::server_url: 'http://w2016glwsus.platform9.puppet.net:8530'
 # default wsus_client target group to production if haven't found one by this point
 wsus_client::target_group: 'Production'
+
+# Hash of vsphere_servers using vsphere_host as key (does host need to be set separately?)
+# Lookup details for each vsphere_host from this hash using profile::pe_patch::vsphere_host
+# eg: in datacentre/dc01.yaml could have:
+# profile::pe_patch::vsphere_host: 'vsphere01.example.com'
+profile::pe_patch::vsphere_servers:
+  'vsphere01.example.com':
+    vsphere_username: 'user01'
+    vsphere_password: 'encryptedsecret01'
+    vsphere_datacenter: 'datacenter01'
+    vsphere_insecure: true
+  'vsphere02.example.com':
+    vsphere_username: 'user02'
+    vsphere_password: 'encryptedsecret02'
+    vsphere_datacenter: 'datacenter02'
+    vsphere_insecure: true
+  'vsphere03.example.com':
+    vsphere_username: 'user03'
+    vsphere_password: 'encryptedsecret03'
+    vsphere_datacenter: 'datacenter03'
+    vsphere_insecure: true
+
+# patch_schedule definitions
+# See: https://forge.puppet.com/modules/puppetlabs/patching_as_code#customizing-the-patch-groups
+patching_as_code::patch_schedule:
+  'role01':
+    day_of_week: Friday
+    count_of_week: 2
+    hours: 19:00-23:00
+    max_runs: 4
+    reboot: ifneeded
+  # role02 gets scheduled patching but does not reboot (organise reboots separately?)
+  'role02':
+    day_of_week: Friday
+    count_of_week: 3
+    hours: 20:00-00:00
+    max_runs: 4
+    reboot: never
+  'role03':
+    day_of_week: Saturday
+    count_of_week: 1
+    hours: 09:00-12:00
+    max_runs: 4
+    reboot: ifneeded
+  'production':
+    day_of_week: Saturday
+    count_of_week: 4
+    hours: 18:00-22:00
+    max_runs: 4
+    reboot: ifneeded
+  'non-production':
+    day_of_week: Thursday
+    count_of_week: 2
+    hours: 18:00-22:00
+    max_runs: 4
+    reboot: always
+
+# Note if patching_as_code::classify_pe_patch is set to true, patch_group for
+# pe_patch and patching_as_code MUST match.
+# If classifying pe_patch separately, they can technically differ but probably
+# still want them to match for sake of own sanity
+#
+# In the absence of any other patch_group definition, default to never (don't
+# patch automatically - this does not prevent pe_patch::patch_server from being
+# run on adhoc basis/initiated manually)
+patching_as_code::patch_group: 'never'

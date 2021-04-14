@@ -1,0 +1,4 @@
+---
+profile::pe_patch::vsphere_host: 'vsphere02.example.com'
+pe_patch::patch_group: 'role02'
+patching_as_code::patch_group: 'role02'

@@ -15,7 +15,7 @@ plan profile::test (
   $_targets = $targets.get_targets()
   $snap_results = apply($_targets) {
     $_targets.each | $target | {
-      $snapname = $target.host # regsubst($n.uri, '^([^.]+).*','\1')
+      $snapname = regsubst($target.uri, '^([^.]+).*','\1')
       notify { $snapname: }
       #$snap_result = apply($target) {
       $vsphere_servers = lookup('profile::pe_patch::vsphere_servers')

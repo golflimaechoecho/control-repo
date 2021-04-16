@@ -25,6 +25,7 @@ Puppet::Functions.create_function(:'profile::dummy') do
     headers = { 'content-type' => 'application/json', 'X-Authentication' => '0RxZgd2x2QOr9OglKGuKTQYl_ErVLs5NtMNYyDT-3ZtQ' }
     @http = Net::HTTP.new(host, port)
     @http.use_ssl = true
+    @http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     @http.request_post('/command/task', data.to_json, headers)
     nk = Nokogiri(response.body)
     # this is expecting xml rather than whatever orchestrator is going to return but let's roll with it for now

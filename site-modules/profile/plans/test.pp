@@ -13,20 +13,18 @@ plan profile::test (
   # Work out vm_names to snapshot (hardcoded to hostname here)
   #$vm_names = patching::target_names($targets, 'hostname')
   $_targets = $targets.get_targets()
-  $results = apply($_targets) {
-    #$_parameter = lookup('profile::test::parameter', { 'default_value' => undef })
-    #$vsphere_host = lookup('profile::test::vsphere_host')
-    #notify { "echo parameter is ${parameter}, _parameter is ${_parameter}, vsphere host is ${vsphere_host}": }
-    $vsphere_servers = lookup('profile::pe_patch::vsphere_servers')
-    $vsphere_host = lookup('profile::pe_patch::vsphere_host')
-    #{ "servers ${vsphere_servers}, host ${vsphere_host}": }
+  $_targets.each | $target | {
+    apply($target) {
+      $vsphere_servers = lookup('profile::pe_patch::vsphere_servers')
+      $vsphere_host = lookup('profile::pe_patch::vsphere_host')
 
-    if $vsphere_host in $vsphere_servers {
-      notify { "${_targets},  host: ${vsphere_host}, other: ${vsphere_servers[$vsphere_host][$vsphere_username]}, ${vsphere_servers[$vsphere_host][$vsphere_password]}, ${vsphere_servers[$vsphere_host][$vsphere_datacenter]}, ${vsphere_servers[$vsphere_host][$vsphere_insecure]}": }
+      if $vsphere_host in $vsphere_servers {
+        notify { "${_targets},  host: ${vsphere_host}, other: ${vsphere_servers[$vsphere_host][$vsphere_username]}, ${vsphere_servers[$vsphere_host][$vsphere_password]}, ${vsphere_servers[$vsphere_host][$vsphere_datacenter]}, ${vsphere_servers[$vsphere_host][$vsphere_insecure]}": }
+      }
     }
   }
-  $results.each | $result | {
-    $report = $result.report['resource_statuses']
-    out::message("report is $report")
-  }
+  #$results.each | $result | {
+  #  $report = $result.report['resource_statuses']
+  #  out::message("report is $report")
+  #}
 }

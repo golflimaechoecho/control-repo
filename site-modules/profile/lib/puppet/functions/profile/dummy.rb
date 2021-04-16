@@ -26,7 +26,7 @@ Puppet::Functions.create_function(:'profile::dummy') do
     @http = Net::HTTP.new(host, port)
     @http.use_ssl = true
     @http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    @http.request_post('/command/task', data.to_json, headers)
+    response = @http.request_post('/command/task', data.to_json, headers)
     nk = Nokogiri(response.body)
     # this is expecting xml rather than whatever orchestrator is going to return but let's roll with it for now
     [nk.xpath('//soapenv:Body/*').select(&:element?).first, response.body.size]

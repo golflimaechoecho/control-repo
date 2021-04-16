@@ -15,12 +15,12 @@ plan profile::test (
   $_targets = $targets.get_targets()
   $snap_results = apply($_targets) {
     $_targets.each | $target | {
-      notify { $target: }
+      $snapname = $target.host # regsubst($n.uri, '^([^.]+).*','\1')
+      notify { $snapname: }
       #$snap_result = apply($target) {
       $vsphere_servers = lookup('profile::pe_patch::vsphere_servers')
       $vsphere_host = lookup('profile::pe_patch::vsphere_host')
       $vsphere_username = $vsphere_servers[$vsphere_host]['vsphere_username']
-      $snapname = $target.host # regsubst($n.uri, '^([^.]+).*','\1')
 
       if $vsphere_host in $vsphere_servers {
         notify { "${snapname}, host: ${vsphere_host}, other: ${vsphere_username}, ${vsphere_servers[$vsphere_host]['vsphere_password']}, ${vsphere_servers[$vsphere_host]['vsphere_datacenter']}, ${vsphere_servers[$vsphere_host]['vsphere_insecure']}": }

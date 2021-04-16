@@ -26,6 +26,7 @@ plan profile::test (
             $vsphere_host = lookup('profile::pe_patch::vsphere_host')
 
             if $vsphere_host in $vsphere_servers {
+              notify { "notify for $snapshot_hostname":
               notify { "snapshot for $snapshot_hostname":
                 message => "patching::snapshot_vmware($snapshot_hostname, 'pe_patch_snapshot', $vsphere_host, $vsphere_servers[$vsphere_host]['vsphere_username'], $vsphere_servers[$vsphere_host]['vsphere_password'], $vsphere_servers[$vsphere_host]['vsphere_datacenter'], $vsphere_servers[$vsphere_host]['vsphere_insecure'], '', false, true, 'create')"
               }

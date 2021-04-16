@@ -14,8 +14,8 @@ plan profile::test (
   #$vm_names = patching::target_names($targets, 'hostname')
   $_targets = $targets.get_targets()
   $snap_results = apply($_targets) {
-    notify { $targets: }
     $_targets.each | $target | {
+      notify { $target: }
       #$snap_result = apply($target) {
       $vsphere_servers = lookup('profile::pe_patch::vsphere_servers')
       $vsphere_host = lookup('profile::pe_patch::vsphere_host')

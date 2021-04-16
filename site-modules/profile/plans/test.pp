@@ -19,7 +19,7 @@ plan profile::test (
 
     $vm_names = patching::target_names($targets, 'hostname')
     if $vsphere_host in $vsphere_servers {
-      notify { "vm_names: ${vm_names},  host: ${vsphere_host}, other: ${vsphere_servers[$vsphere_host][$vsphere_username]}, ${vsphere_servers[$vsphere_host][$vsphere_password]}, ${vsphere_servers[$vsphere_host][$vsphere_datacenter]}, ${vsphere_servers[$vsphere_host][$vsphere_insecure]}" }
+      notify { "vm_names: ${vm_names},  host: ${vsphere_host}, other: ${vsphere_servers[$vsphere_host][$vsphere_username]}, ${vsphere_servers[$vsphere_host][$vsphere_password]}, ${vsphere_servers[$vsphere_host][$vsphere_datacenter]}, ${vsphere_servers[$vsphere_host][$vsphere_insecure]}": }
     }
   }
   $results.each | $result | {

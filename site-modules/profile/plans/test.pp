@@ -14,7 +14,7 @@ plan profile::test (
   #$vm_names = patching::target_names($targets, 'hostname')
   $_targets = $targets.get_targets()
   $_targets.each | $target | {
-    apply($target) {
+    $snap_result = apply($target) {
       $vsphere_servers = lookup('profile::pe_patch::vsphere_servers')
       $vsphere_host = lookup('profile::pe_patch::vsphere_host')
 
@@ -22,6 +22,8 @@ plan profile::test (
         notify { "${_targets},  host: ${vsphere_host}, other: ${vsphere_servers[$vsphere_host][$vsphere_username]}, ${vsphere_servers[$vsphere_host][$vsphere_password]}, ${vsphere_servers[$vsphere_host][$vsphere_datacenter]}, ${vsphere_servers[$vsphere_host][$vsphere_insecure]}": }
       }
     }
+    $report = $snap_result.report['resource_statuses']
+    out::message("report is $report")
   }
   #$results.each | $result | {
   #  $report = $result.report['resource_statuses']

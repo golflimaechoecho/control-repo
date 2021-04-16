@@ -8,8 +8,12 @@ plan profile::test (
   #run_task(facter_task, $targets, '_catch_errors' => true)
   #run_plan(facts, targets => $targets)
   apply_prep($targets)
-  $parameter = lookup('profile::test::parameter', { 'default_value' => undef })
-  $results = apply($targets) {
+  # patching::snapshot_vmware appears to take vsphere details from first target (ie: assumes all on same)
+  # to be able to lookup indiv details, need to iterate on loop ie: take snapshots serially not in parallel
+  # Work out vm_names to snapshot (hardcoded to hostname here)
+  #$vm_names = patching::target_names($targets, 'hostname')
+  $_targets = $targets.get_targets()
+  $results = apply($_targets) {
     #$_parameter = lookup('profile::test::parameter', { 'default_value' => undef })
     #$vsphere_host = lookup('profile::test::vsphere_host')
     #notify { "echo parameter is ${parameter}, _parameter is ${_parameter}, vsphere host is ${vsphere_host}": }
@@ -17,9 +21,8 @@ plan profile::test (
     $vsphere_host = lookup('profile::pe_patch::vsphere_host')
     #{ "servers ${vsphere_servers}, host ${vsphere_host}": }
 
-    $vm_names = patching::target_names($targets, 'hostname')
     if $vsphere_host in $vsphere_servers {
-      notify { "vm_names: ${vm_names},  host: ${vsphere_host}, other: ${vsphere_servers[$vsphere_host][$vsphere_username]}, ${vsphere_servers[$vsphere_host][$vsphere_password]}, ${vsphere_servers[$vsphere_host][$vsphere_datacenter]}, ${vsphere_servers[$vsphere_host][$vsphere_insecure]}": }
+      notify { "${_targets},  host: ${vsphere_host}, other: ${vsphere_servers[$vsphere_host][$vsphere_username]}, ${vsphere_servers[$vsphere_host][$vsphere_password]}, ${vsphere_servers[$vsphere_host][$vsphere_datacenter]}, ${vsphere_servers[$vsphere_host][$vsphere_insecure]}": }
     }
   }
   $results.each | $result | {

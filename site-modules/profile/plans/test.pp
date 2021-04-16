@@ -52,7 +52,7 @@ plan profile::test (
         # hopefully this is a resultset??
         #$mytype = type($snapshot_results)
         #out::message("Snapshot result is: ${mytype}")
-        $snapshot_results.each | $snap_result | {
+        $snapshot_results.results.each | $snap_result | {
           #$report = $snap_result.results[0].report['resource_statuses']
           $mytype = type($snap_result)
           out::message("result is: ${mytype}")

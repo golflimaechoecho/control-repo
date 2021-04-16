@@ -17,9 +17,10 @@ plan profile::test (
     $snap_result = apply($target) {
       $vsphere_servers = lookup('profile::pe_patch::vsphere_servers')
       $vsphere_host = lookup('profile::pe_patch::vsphere_host')
+      $vsphere_username = $vsphere_servers[$vsphere_host][$vsphere_username]
 
       if $vsphere_host in $vsphere_servers {
-        notify { "${target}.host,  host: ${vsphere_host}, other: ${vsphere_servers[$vsphere_host][$vsphere_username]}, ${vsphere_servers[$vsphere_host][$vsphere_password]}, ${vsphere_servers[$vsphere_host][$vsphere_datacenter]}, ${vsphere_servers[$vsphere_host][$vsphere_insecure]}": }
+        notify { "${target}.host,  host: ${vsphere_host}, other: ${vsphere_username}, $vsphere_servers[$vsphere_host][$vsphere_password], ${vsphere_servers[$vsphere_host][$vsphere_datacenter]}, ${vsphere_servers[$vsphere_host][$vsphere_insecure]}": }
       }
     }
     $report = $snap_result.results[0].report['resource_statuses']

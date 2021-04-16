@@ -72,7 +72,7 @@ plan profile::auto_patch (
         apply_prep($node_healthy)
         $to_snapshot = $node_healthy.get_targets()
         $snapshot_results = $to_snapshot.reduce([]) | $memo, $snapshot_target | {
-          apply($snapshot_target, '_catch_errors' => true) {
+          $snapshot_result = apply($snapshot_target, '_catch_errors' => true) {
             # vcenter has hosts defined with hostname (shortname); match this to take snapshot
             $snapshot_hostname = $snapshot_target.host
 
@@ -107,13 +107,16 @@ plan profile::auto_patch (
               fail("Unable to find specified vsphere_host ${vsphere_host} for ${snapshot_target}")
             }
           }
+          $memo + $snapshot_result
         }
 
         # hopefully this is a resultset??
-        $mytype = type($snapshot_results)
-        out::message("Snapshot result is: ${mytype}")
-        $snapshot_results.each | $snap_result| {
+        #$mytype = type($snapshot_results)
+        #out::message("Snapshot result is: ${mytype}")
+        $snapshot_results.each | $snap_result | {
           #$report = $snap_result.results[0].report['resource_statuses']
+          $mytype = type($snap_result)
+          out::message("result is: ${mytype}")
           $report = $snap_result.report['resource_statuses']
           out::message("report is $report")
         }

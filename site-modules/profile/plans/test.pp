@@ -22,7 +22,7 @@ plan profile::test (
         notify { "${_targets},  host: ${vsphere_host}, other: ${vsphere_servers[$vsphere_host][$vsphere_username]}, ${vsphere_servers[$vsphere_host][$vsphere_password]}, ${vsphere_servers[$vsphere_host][$vsphere_datacenter]}, ${vsphere_servers[$vsphere_host][$vsphere_insecure]}": }
       }
     }
-    $report = $snap_result.report['resource_statuses']
+    $report = $snap_result.results[0].report['resource_statuses']
     out::message("report is $report")
   }
   #$results.each | $result | {

@@ -6,7 +6,7 @@ plan profile::test (
   TargetSpec $targets,
 ) {
   #run_task(facter_task, $targets, '_catch_errors' => true)
-  #run_plan(facts, targets => $targets)
+  run_plan(facts, targets => $targets)
   apply_prep($targets)
   #profile::dummy('ip-172-31-38-55.ap-southeast-2.compute.internal', '8143')
   #apply_prep($node_healthy)

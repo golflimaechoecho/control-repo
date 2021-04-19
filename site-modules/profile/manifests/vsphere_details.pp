@@ -29,7 +29,7 @@ class profile::vsphere_details (
 
   file { "${extfactdir}/vsphere_details.yaml":
     ensure  => file,
-    content => epp("${module_name}/vsphere_details.epp"),
+    content => epp("${module_name}/vsphere_details.epp", { 'vsphere_datacenter' => $vsphere_datacenter, 'vsphere_host' => $vsphere_host }),
     *       => $fact_file_attributes,
   }
 }

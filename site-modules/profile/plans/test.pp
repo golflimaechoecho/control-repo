@@ -21,7 +21,7 @@ plan profile::test (
 
   out::message("vsphere_servers is ${vsphere_servers}")
   $snapshot_results = $to_snapshot.reduce([]) | $memo, $snapshot_target | {
-    out::message("help: ${snapshot_target.facts['vsphere_details']}")
+    out::message("help: $snapshot_target.facts['os']['family'] $snapshot_target.facts['vsphere_details']")
   }
 
   #$snapshot_results = $to_snapshot.reduce([]) | $memo, $snapshot_target | {

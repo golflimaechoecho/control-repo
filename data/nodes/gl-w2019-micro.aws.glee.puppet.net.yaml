@@ -1,0 +1,2 @@
+---
+profile::pe_patch::vsphere_host: 'vsphere03.example.com'

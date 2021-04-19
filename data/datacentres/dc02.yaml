@@ -1,0 +1,3 @@
+---
+profile::vsphere_details::vsphere_host: vsphere02.example.com
+profile::vsphere_details::vsphere_datacenter: datacenter02

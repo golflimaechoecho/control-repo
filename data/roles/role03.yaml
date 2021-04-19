@@ -1,0 +1,3 @@
+---
+pe_patch::patch_group: 'role03'
+patching_as_code::patch_group: 'role03'

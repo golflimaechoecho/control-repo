@@ -1,4 +1,22 @@
 ---
-# plan_hierarchy hiera
-profile::test::vsphere_host: 'fallback.platform9.puppet.net'
-profile::test::parameter: 'plan_hierarchy fallback only'
+# plan_hierarchy hiera (https://puppet.com/docs/bolt/latest/hiera.html)
+# requires PE 2019.8.5 or later (https://puppet.com/docs/pe/2019.8/release_notes_pe.html#use-hiera-lookups-outside-of-apply-blocks-in-plans)
+# intended to lookup static data for plans only
+
+# Hash of vsphere_servers using vsphere_host as key
+# Lookup details for each vsphere_host from this hash using profile::vsphere_details::vsphere_host
+# eg: in datacentre/dc01.yaml could have:
+# profile::vsphere_details::vsphere_host: 'vsphere01.example.com'
+profile::vsphere_details::vsphere_servers:
+  'vsphere01.example.com':
+    vsphere_username: 'user01'
+    vsphere_password: 'encryptedsecret01'
+    vsphere_insecure: true
+  'vsphere02.example.com':
+    vsphere_username: 'user02'
+    vsphere_password: 'encryptedsecret02'
+    vsphere_insecure: true
+  'vsphere03.example.com':
+    vsphere_username: 'user03'
+    vsphere_password: 'encryptedsecret03'
+    vsphere_insecure: true

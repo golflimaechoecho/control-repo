@@ -21,45 +21,41 @@ plan profile::test (
 
   out::message("vsphere_servers is ${vsphere_servers}")
   $snapshot_results = $to_snapshot.reduce([]) | $memo, $snapshot_target | {
-    out::message("${snapshot_target.facts['os']['family']}")
-    out::message("${snapshot_target.facts['vsphere_details']}")
+    out::message("${snapshot_target.facts['vsphere_details']['vsphere_host']}")
+
+    $snapshot_result = apply($snapshot_target, '_catch_errors' => true) {
+      # vcenter has hosts defined with hostname (shortname); match this to take snapshot
+      $snapshot_hostname = $snapshot_target.host
+
+      # vsphere_host needs to stay in loop as must be looked up per-target
+      $vsphere_host = $snapshot_target.facts['vsphere_details']['vsphere_host']
+      $vsphere_datacenter = $snapshot_target.facts['vsphere_details']['vsphere_datacenter']
+      notify { "vsphere host ${vsphere_host} vsphere_datacenter ${vsphere_datacenter}": }
+
+      if $vsphere_host in $vsphere_servers {
+        notify { "snapshot for $snapshot_hostname":
+          #message => "patching::snapshot_vmware(${snapshot_hostname}, 'pe_patch_snapshot', $vsphere_host, ${vsphere_servers[$vsphere_host]['vsphere_username']}, ${vsphere_servers[$vsphere_host]['vsphere_password']}, ${vsphere_datacenter}, ${vsphere_servers[$vsphere_host]['vsphere_insecure']}, '', false, true, 'create')",
+        }
+        # call function directly with current defaults from
+        # https://github.com/EncoreTechnologies/puppet-patching/blob/master/plans/snapshot_vmware.pp
+        # NOTE: calling function via apply block may need gem installed on puppetserver :head_desk:
+        #patching::snapshot_vmware([$snapshot_hostname],
+        #                          'pe_patch_snapshot',
+        #                          $vsphere_host,
+        #                          $vsphere_servers[$vsphere_host]['vsphere_username'],
+        #                          $vsphere_servers[$vsphere_host]['vsphere_password'],
+        #                          $vsphere_datacenter,
+        #                          $vsphere_servers[$vsphere_host]['vsphere_insecure'],
+        #                          '',
+        #                          false,
+        #                          true,
+        #                          'create')
+      } else {
+        fail("Unable to find specified vsphere_host ${vsphere_host} for ${snapshot_target}")
+      }
+    }
+    $memo + $snapshot_result
   }
-
-  #$snapshot_results = $to_snapshot.reduce([]) | $memo, $snapshot_target | {
-  #  $snapshot_result = apply($snapshot_target, '_catch_errors' => true) {
-  #    # vcenter has hosts defined with hostname (shortname); match this to take snapshot
-  #    $snapshot_hostname = $snapshot_target.host
-
-  #    # vsphere_host needs to stay in loop as must be looked up per-target
-  #    $vsphere_host = $snapshot_target.facts['vsphere_details']['vsphere_host']
-  #    $vsphere_datacenter = $snapshot_target.facts['vsphere_details']['vsphere_datacenter']
-  #    notify { "vsphere servers ${vsphere_servers}": }
-  #    notify { "vsphere host ${vsphere_host} vsphere_datacenter ${vsphere_datacenter}": }
-
-  #    #if $vsphere_host in $vsphere_servers {
-  #      notify { "snapshot for $snapshot_hostname":
-  #        #message => "patching::snapshot_vmware(${snapshot_hostname}, 'pe_patch_snapshot', $vsphere_host, ${vsphere_servers[$vsphere_host]['vsphere_username']}, ${vsphere_servers[$vsphere_host]['vsphere_password']}, ${vsphere_datacenter}, ${vsphere_servers[$vsphere_host]['vsphere_insecure']}, '', false, true, 'create')",
-  #      }
-  #      # call function directly with current defaults from
-  #      # https://github.com/EncoreTechnologies/puppet-patching/blob/master/plans/snapshot_vmware.pp
-  #      # NOTE: calling function via apply block may need gem installed on puppetserver :head_desk:
-  #      #patching::snapshot_vmware([$snapshot_hostname],
-  #      #                          'pe_patch_snapshot',
-  #      #                          $vsphere_host,
-  #      #                          $vsphere_servers[$vsphere_host]['vsphere_username'],
-  #      #                          $vsphere_servers[$vsphere_host]['vsphere_password'],
-  #      #                          $vsphere_datacenter,
-  #      #                          $vsphere_servers[$vsphere_host]['vsphere_insecure'],
-  #      #                          '',
-  #      #                          false,
-  #      #                          true,
-  #      #                          'create')
-  #    #} else {
-  #    #  fail("Unable to find specified vsphere_host ${vsphere_host} for ${snapshot_target}")
-  #    #}
-  #  }
-  #  $memo + $snapshot_result
-  #}
 
   ## $snapshot_results should be Array[ResultSet]
   #$snapshot_results.each | $snap_result | {

@@ -11,25 +11,26 @@ plan profile::test (
   #profile::dummy('ip-172-31-38-55.ap-southeast-2.compute.internal', '8143')
   #apply_prep($node_healthy)
   $to_snapshot = $targets.get_targets()
+
+  # vsphere_servers could be moved to plan_hierarchy to perform lookup
+  # outside apply block (rather than repeating for each target)
+  # requires PE 2019.8.5+; this would also mean need to duplicate/keep
+  # in sync if details needed in standard hiera
+  # https://puppet.com/docs/bolt/latest/hiera.html#outside-apply-blocks
+  $vsphere_servers = lookup('profile::vsphere_details::vsphere_servers')
+
   $snapshot_results = $to_snapshot.reduce([]) | $memo, $snapshot_target | {
     $snapshot_result = apply($snapshot_target, '_catch_errors' => true) {
       # vcenter has hosts defined with hostname (shortname); match this to take snapshot
       $snapshot_hostname = $snapshot_target.host
 
-      # vsphere_servers could be moved to plan_hierarchy to perform lookup
-      # outside apply block (rather than repeating for each target)
-      # requires PE 2019.8.5+; this would also mean need to duplicate/keep
-      # in sync if details needed in standard hiera
-      # https://puppet.com/docs/bolt/latest/hiera.html#outside-apply-blocks
-      $vsphere_servers = lookup('profile::pe_patch::vsphere_servers')
-
       # vsphere_host needs to stay in loop as must be looked up per-target
-      $vsphere_host = lookup('profile::pe_patch::vsphere_host')
+      $vsphere_host = $snapshot_target.facts['vsphere_details']['vsphere_host']
+      $vsphere_datacenter = $snapshot_target.facts['vsphere_details']['vsphere_datacenter']
 
       if $vsphere_host in $vsphere_servers {
-        notify { "notify for $snapshot_hostname": }
         notify { "snapshot for $snapshot_hostname":
-          message => "patching::snapshot_vmware($snapshot_hostname, 'pe_patch_snapshot', $vsphere_host, ${vsphere_servers[$vsphere_host]['vsphere_username']}, ${vsphere_servers[$vsphere_host]['vsphere_password']}, ${vsphere_servers[$vsphere_host]['vsphere_datacenter']}, ${vsphere_servers[$vsphere_host]['vsphere_insecure']}, '', false, true, 'create')",
+          message => "patching::snapshot_vmware(${snapshot_hostname}, 'pe_patch_snapshot', $vsphere_host, ${vsphere_servers[$vsphere_host]['vsphere_username']}, ${vsphere_servers[$vsphere_host]['vsphere_password']}, ${vsphere_datacenter}, ${vsphere_servers[$vsphere_host]['vsphere_insecure']}, '', false, true, 'create')",
         }
         # call function directly with current defaults from
         # https://github.com/EncoreTechnologies/puppet-patching/blob/master/plans/snapshot_vmware.pp
@@ -39,7 +40,7 @@ plan profile::test (
         #                          $vsphere_host,
         #                          $vsphere_servers[$vsphere_host]['vsphere_username'],
         #                          $vsphere_servers[$vsphere_host]['vsphere_password'],
-        #                          $vsphere_servers[$vsphere_host]['vsphere_datacenter'],
+        #                          $vsphere_datacenter,
         #                          $vsphere_servers[$vsphere_host]['vsphere_insecure'],
         #                          '',
         #                          false,
@@ -52,14 +53,10 @@ plan profile::test (
     $memo + $snapshot_result
   }
 
-  # hopefully this is a resultset??
-  #$mytype = type($snapshot_results)
-  #out::message("Snapshot result is: ${mytype}")
+  # $snapshot_results should be Array[ResultSet]
   $snapshot_results.each | $snap_result | {
     #$report = $snap_result.results[0].report['resource_statuses']
-    $mytype = type($snap_result.results)
-    out::message("result is: ${mytype}")
-    $report = $snap_result.results
+    $report = $snap_result.results.report['resource_statuses']
     out::message("report is $report")
   }
 

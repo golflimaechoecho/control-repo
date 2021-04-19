@@ -9,9 +9,15 @@ class profile::vsphere_details {
     case $facts['os']['family'] {
       'windows': {
         $extfactdir = 'C:/ProgramData/PuppetLabs/facter/facts.d'
+        $fact_file_attributes = {}
       }
       default: {
         $extfactdir = '/etc/puppetlabs/facter/facts.d'
+        $fact_file_attributes = {
+          'owner' => 'root',
+          'group' => 'root',
+          'mode'  => '0644',
+        }
       }
     }
 
@@ -22,10 +28,8 @@ class profile::vsphere_details {
 
     file { "${extfactdir}/vsphere_details.yaml":
       ensure  => file,
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0644',
       content => epp("${module_name}/vsphere_details.epp", { 'vsphere_host' => $vsphere_host, 'vsphere_details' => $vsphere_servers[$vsphere_host] }),
+      *       => $fact_file_attributes,
     }
   } else {
     fail("Unable to find specified vsphere_host ${vsphere_host} for ${trusted['certname']}")

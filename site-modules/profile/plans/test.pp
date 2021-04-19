@@ -56,7 +56,7 @@ plan profile::test (
   # $snapshot_results should be Array[ResultSet]
   $snapshot_results.each | $snap_result | {
     #$report = $snap_result.results[0].report['resource_statuses']
-    $report = $snap_result.results.report['resource_statuses']
+    $report = $snap_result.results
     out::message("report is $report")
   }
 

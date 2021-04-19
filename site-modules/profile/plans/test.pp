@@ -34,17 +34,17 @@ plan profile::test (
         # call function directly with current defaults from
         # https://github.com/EncoreTechnologies/puppet-patching/blob/master/plans/snapshot_vmware.pp
         # NOTE: calling function via apply block may need gem installed on puppetserver :head_desk:
-        patching::snapshot_vmware([$snapshot_hostname],
-                                  'pe_patch_snapshot',
-                                  $vsphere_host,
-                                  $vsphere_servers[$vsphere_host]['vsphere_username'],
-                                  $vsphere_servers[$vsphere_host]['vsphere_password'],
-                                  $vsphere_servers[$vsphere_host]['vsphere_datacenter'],
-                                  $vsphere_servers[$vsphere_host]['vsphere_insecure'],
-                                  '',
-                                  false,
-                                  true,
-                                  'create')
+        #patching::snapshot_vmware([$snapshot_hostname],
+        #                          'pe_patch_snapshot',
+        #                          $vsphere_host,
+        #                          $vsphere_servers[$vsphere_host]['vsphere_username'],
+        #                          $vsphere_servers[$vsphere_host]['vsphere_password'],
+        #                          $vsphere_servers[$vsphere_host]['vsphere_datacenter'],
+        #                          $vsphere_servers[$vsphere_host]['vsphere_insecure'],
+        #                          '',
+        #                          false,
+        #                          true,
+        #                          'create')
       } else {
         fail("Unable to find specified vsphere_host ${vsphere_host} for ${snapshot_target}")
       }

@@ -15,6 +15,11 @@ class profile::vsphere_details {
       }
     }
 
+    # ensure parent directories created - dirname() from stdlib
+    file { [ dirname($extfactdir), $extfactdir ]:
+      ensure => directory,
+    }
+
     file { "${extfactdir}/vsphere_details.yaml":
       ensure  => file,
       owner   => 'root',

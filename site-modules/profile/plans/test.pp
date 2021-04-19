@@ -34,7 +34,7 @@ plan profile::test (
         # call function directly with current defaults from
         # https://github.com/EncoreTechnologies/puppet-patching/blob/master/plans/snapshot_vmware.pp
         # NOTE: calling function via apply block may need gem installed on puppetserver :head_desk:
-        patching::snapshot_vmware($snapshot_hostname,
+        patching::snapshot_vmware([$snapshot_hostname],
                                   'pe_patch_snapshot',
                                   $vsphere_host,
                                   $vsphere_servers[$vsphere_host]['vsphere_username'],

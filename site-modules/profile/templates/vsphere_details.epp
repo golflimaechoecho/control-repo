@@ -1,4 +1,4 @@
 ---
 vsphere_details:
-  vsphere_host: <%= $vsphere_host %>
-  vsphere_datacenter: <%= $vsphere_datacenter %>
+  vsphere_host: <%= $profile::vsphere_details::vsphere_host %>
+  vsphere_datacenter: <%= $profile::vsphere_details::vsphere_datacenter %>

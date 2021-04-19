@@ -29,6 +29,7 @@ plan profile::test (
       # vsphere_host needs to stay in loop as must be looked up per-target
       $vsphere_host = $snapshot_target.facts['vsphere_details']['vsphere_host']
       $vsphere_datacenter = $snapshot_target.facts['vsphere_details']['vsphere_datacenter']
+      notify { "vsphere servers ${vsphere_servers}": }
       notify { "vsphere host ${vsphere_host} vsphere_datacenter ${vsphere_datacenter}": }
 
       #if $vsphere_host in $vsphere_servers {

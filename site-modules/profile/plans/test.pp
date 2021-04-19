@@ -7,7 +7,7 @@ plan profile::test (
 ) {
   #run_task(facter_task, $targets, '_catch_errors' => true)
   run_plan(puppetdb_fact, targets => $targets)
-  apply_prep($targets)
+  #apply_prep($targets)
   #profile::dummy('ip-172-31-38-55.ap-southeast-2.compute.internal', '8143')
   #apply_prep($node_healthy)
   $to_snapshot = $targets.get_targets()

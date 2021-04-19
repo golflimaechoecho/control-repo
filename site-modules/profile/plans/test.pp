@@ -57,12 +57,12 @@ plan profile::test (
     $memo + $snapshot_result
   }
 
-  ## $snapshot_results should be Array[ResultSet]
-  #$snapshot_results.each | $snap_result | {
-  #  #$report = $snap_result.results[0].report['resource_statuses']
-  #  $report = $snap_result.results
-  #  out::message("report is $report")
-  #}
+  # $snapshot_results should be Array[ResultSet]
+  $snapshot_results.each | $snap_result | {
+    #$report = $snap_result.results[0].report['resource_statuses']
+    $report = $snap_result.results
+    out::message("report is $report")
+  }
 
   # patching::snapshot_vmware appears to take vsphere details from first target (ie: assumes all on same)
   # to be able to lookup indiv details, need to iterate on loop ie: take snapshots serially not in parallel

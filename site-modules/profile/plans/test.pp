@@ -19,6 +19,8 @@ plan profile::test (
   # https://puppet.com/docs/bolt/latest/hiera.html#outside-apply-blocks
   $vsphere_servers = lookup('profile::vsphere_details::vsphere_servers')
 
+  out::message("vsphere_servers is ${vsphere_servers}")
+
   $snapshot_results = $to_snapshot.reduce([]) | $memo, $snapshot_target | {
     $snapshot_result = apply($snapshot_target, '_catch_errors' => true) {
       # vcenter has hosts defined with hostname (shortname); match this to take snapshot

@@ -12,6 +12,7 @@ hierarchy:
       - "roles/%{trusted.extensions.pp_role}.yaml"
       - "apptiers/%{trusted.extensions.pp_apptier}.yaml"
       - "environments/%{trusted.extensions.pp_environment}.yaml"
+      - "os/%{facts.os.family}.yaml"
       - "datacentres/%{trusted.extensions.pp_datacenter}.yaml"
       - "common.yaml"
 

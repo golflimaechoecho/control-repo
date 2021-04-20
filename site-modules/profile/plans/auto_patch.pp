@@ -65,8 +65,9 @@ plan profile::auto_patch (
         #$pre_update_done = $to_pre_update.ok_set.names
         #$pre_update_failed = $to_pre_update.error_set.names
 
-        out::message('PLACEHOLDER: add snapshot details here')
         if $perform_backup {
+          out::message('Perform snapshot here')
+
           # Take snapshots prior to patching
           # patching::snapshot_vmware takes vsphere details from first target
           # (assumes have same details); to be able to lookup individual details
@@ -94,7 +95,7 @@ plan profile::auto_patch (
             fail_plan("Unable to find details for vsphere_host ${vsphere_host}")
           }
           $to_snapshot = run_plan('patching::snapshot_vmware',
-                                  'targets'              => $snapshot_target,
+                                  'targets'              => $node_healthy,
                                   'action'               => 'create',
                                   'target_name_property' => 'hostname',
                                   'vsphere_host'         => $vsphere_host,

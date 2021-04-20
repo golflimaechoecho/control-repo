@@ -100,19 +100,21 @@ plan profile::auto_patch (
                                   'noop'                 => $noop,
                                   '_catch_errors'        => true)
 
-          $to_snap_type = type($to_snapshot)
-          out::message("to_snapshot is ${to_snap_type}")
-
-          # if plan run in noop, probably not getting correct result, fudge to use node_healthy for now
+          # if snapshot plan run in noop, use node_healthy for now
           if $noop {
             $snapshot_done = $node_healthy
             $snapshot_failed = []
           } else {
+            # DEBUG: check plan is returning expected result type to get ok_set, error_set
+            $to_snap_type = type($to_snapshot)
+            out::message("to_snapshot is ${to_snap_type}")
+            # end DEBUG
+
             $snapshot_done = $to_snapshot.ok_set.names
             $snapshot_failed = $to_snapshot.error_set.names
           }
         } else {
-          out::message("\$perform_backup set to false, skipping snapshot")
+          out::message("INFO: perform_backup set to false, skipping snapshot")
           # use node_healthy as list to continue
           $snapshot_done = $node_healthy
           $snapshot_failed = []

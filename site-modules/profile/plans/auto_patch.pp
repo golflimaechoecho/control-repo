@@ -92,7 +92,7 @@ plan profile::auto_patch (
                                          'vsphere_host'         => $vsphere_host,
                                          'vsphere_username'     => $vsphere_username,
                                          'vsphere_password'     => $vsphere_password,
-                                         'vsphere_datacenter'   => $snapshot_target.facts['vsphere_details']['vsphere_datacenter']
+                                         'vsphere_datacenter'   => $snapshot_target.facts['vsphere_details']['vsphere_datacenter'],
                                          'vsphere_insecure'     => $vsphere_insecure,
                                          'noop'                 => $noop,
                                          '_catch_errors' => true) {

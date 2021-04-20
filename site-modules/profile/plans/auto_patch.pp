@@ -95,8 +95,7 @@ plan profile::auto_patch (
                                          'vsphere_datacenter'   => $snapshot_target.facts['vsphere_details']['vsphere_datacenter'],
                                          'vsphere_insecure'     => $vsphere_insecure,
                                          'noop'                 => $noop,
-                                         '_catch_errors' => true) {
-            }
+                                         '_catch_errors' => true)
           } else {
             fail("${snapshot_target} Unable to find details for vsphere_host ${vsphere_host}")
           }

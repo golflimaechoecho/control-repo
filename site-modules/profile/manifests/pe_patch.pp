@@ -54,7 +54,7 @@ class profile::pe_patch (
         owner  => 'root',
         group  => 'root',
         mode   => '0755',
-        source => "puppet:///modules/${module_name}/profile/pre_pe_patch",
+        source => "puppet:///modules/${module_name}/pre_pe_patch",
       }
 
       file { $post_patching_scriptpath:
@@ -62,7 +62,7 @@ class profile::pe_patch (
         owner  => 'root',
         group  => 'root',
         mode   => '0755',
-        source => "puppet:///modules/${module_name}/profile/post_pe_patch",
+        source => "puppet:///modules/${module_name}/post_pe_patch",
       }
 
       # non-standard/custom attempt to test post-patch post-reboot script
@@ -77,7 +77,7 @@ class profile::pe_patch (
         owner  => 'root',
         group  => 'root',
         mode   => '0755',
-        source => "puppet:///modules/${module_name}/profile/post_pe_patch_post_reboot",
+        source => "puppet:///modules/${module_name}/post_pe_patch_post_reboot",
       }
     }
     'windows': {

@@ -1,0 +1,21 @@
+#!/bin/sh
+# dummy post-patch script
+# Note post_patching_scriptpath is executed BEFORE pe_patch reboot, and is not
+# executed if there are no patches to apply (even w/ reboot = always specified)
+#
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+echo "post-patch script from $(hostname)" > /var/log/pe_patch_testing_${TIMESTAMP}.log 2>&1
+
+echo "patches applied, reboot pending" >> /var/log/pe_patch_testing_${TIMESTAMP}.log 2>&1
+echo "placeholder: run post-patch healthcheck here" >> /var/log/pe_patch_testing_${TIMESTAMP}.log 2>&1
+echo "placeholder: send email here" >> /var/log/pe_patch_testing_${TIMESTAMP}.log 2>&1
+
+echo "test setting up post-reboot script (assumes root!)" >> /var/log/pe_patch_testing_${TIMESTAMP}.log 2>&1
+# below assumes this script is being run as root
+# set up cronjob to run additional script after next reboot
+# Note: this assumes unmanaged cron resources are NOT being purged
+# the script run by the cronjob should also remove the cron entry so it will not
+# run on subsequent reboots - ie: ensure the resource names match!
+/opt/puppetlabs/bin/puppet resource cron custom_post_pe_patch_post_reboot ensure=present command='/opt/pe_patch/post_pe_patch_post_reboot > /dev/null 2>&1' special='reboot' user='root' >> /var/log/pe_patch_testing_${TIMESTAMP}.log 2>&1
+
+echo "end ${0} proceed to reboot (if configured)" >> /var/log/pe_patch_testing_${TIMESTAMP}.log 2>&1

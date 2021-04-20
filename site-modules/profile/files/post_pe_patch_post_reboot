@@ -1,0 +1,22 @@
+#!/bin/sh
+# post_pe_patch_post_reboot script
+#
+# This is set up via @reboot cron entry created by the (pre-reboot) post_patch script
+# the first thing this script does is remove this entry to avoid running on subsequent reboots
+#
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+echo "post-patch post-reboot script from $(hostname)" > /var/log/pe_patch_testing_${TIMESTAMP}.log 2>&1
+
+echo "cleanup crontab first to avoid running on subsequent reboots" >> /var/log/pe_patch_testing_${TIMESTAMP}.log 2>&1
+# below assumes this script is being run as root
+# remove cron entry to run at reboot - ensure the resource name matches the cron entry created earlier
+/opt/puppetlabs/bin/puppet resource cron custom_post_pe_patch_post_reboot ensure=absent user='root' >> /var/log/pe_patch_testing_${TIMESTAMP}.log 2>&1
+
+echo "confirm custom_post_pe_patch_post_reboot crontab entry removed (should show absent)" >> /var/log/pe_patch_testing_${TIMESTAMP}.log 2>&1
+
+/opt/puppetlabs/bin/puppet resource cron custom_post_pe_patch_post_reboot >> /var/log/pe_patch_testing_${TIMESTAMP}.log 2>&1
+
+echo "placeholder: run post-reboot healthcheck here" >> /var/log/pe_patch_testing_${TIMESTAMP}.log 2>&1
+echo "placeholder: send post-reboot email here" >> /var/log/pe_patch_testing_${TIMESTAMP}.log 2>&1
+
+echo "end ${0}" >> /var/log/pe_patch_testing_${TIMESTAMP}.log 2>&1

@@ -1,0 +1,9 @@
+#!/bin/sh
+# dummy pre-patch script
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+echo "pre-patch script from $(hostname)" > /var/log/pe_patch_testing_${TIMESTAMP}.log 2>&1
+
+echo "placeholder: run healthcheck here" >> /var/log/pe_patch_testing_${TIMESTAMP}.log 2>&1
+echo "placeholder: take snapshot here" >> /var/log/pe_patch_testing_${TIMESTAMP}.log 2>&1
+
+echo "end ${0}, proceed to patching" >> /var/log/pe_patch_testing_${TIMESTAMP}.log 2>&1

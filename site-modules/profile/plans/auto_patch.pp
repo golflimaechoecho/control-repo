@@ -25,7 +25,6 @@ plan profile::auto_patch (
     $not_patched = []
     $check_failed = []
     $check_passed = []
-    $pre_update_failed = []
     $post_update_failed = []
   } else {
     # Check the health of the puppet agent on all nodes
@@ -41,7 +40,6 @@ plan profile::auto_patch (
       $not_patched = []
       $check_failed = []
       $check_passed = []
-      $pre_update_failed = []
       $post_update_failed = []
     } else {
       # Do pre-patching health checks
@@ -56,14 +54,9 @@ plan profile::auto_patch (
         $not_patched = []
         $check_failed = []
         $check_passed = []
-        $pre_update_failed = []
         $post_update_failed = []
       } else {
-        # Use inbuilt pe_patch::pre_patching_scriptpath rather than separate task for pre-script
-        #$to_pre_update = run_task('patching::pre_update', $node_healthy, '_catch_errors' =>  true)
-
-        #$pre_update_done = $to_pre_update.ok_set.names
-        #$pre_update_failed = $to_pre_update.error_set.names
+        # Use inbuilt pe_patch::pre_patching_scriptpath rather than separate patching::pre_update task
 
         if $perform_backup {
           out::message('Perform snapshot here')
@@ -153,7 +146,7 @@ plan profile::auto_patch (
         }
 
         # Wait until the nodes are back up
-        # NB: should this be checking patched list (or at least pre_update_done rather than all node_healthy?
+        # NB: should this be checking patched (or snapshot) list rather than all node_healthy?
         $to_post_check = wait_until_available($node_healthy, wait_time => 300)
 
         # Pull out list of those that are ok/in error
@@ -195,7 +188,6 @@ plan profile::auto_patch (
     'patching_failed'            => $not_patched,
     'post_check_failed'          => $check_failed,
     'nodes_patched'              => $check_passed,
-    'pre_update_failed'          => $pre_update_failed,
     'post_update_failed'         => $post_update_failed,
     'counts'                     => {
       'all_nodes_in_group_count'   => $full_list.count,
@@ -205,7 +197,6 @@ plan profile::auto_patch (
       'patching_failed'            => $not_patched.count,
       'post_check_failed'          => $check_failed.count,
       'nodes_patched'              => $check_passed.count,
-      'pre_update_failed'          => $pre_update_failed.count,
       'post_update_failed'         => $post_update_failed.count,
     }
   })

@@ -4,6 +4,7 @@ plan profile::auto_patch (
   String $patch_group,
   Boolean $security_only = false,
   Enum['always', 'never', 'patched', 'smart'] $reboot = 'patched',
+  Boolean $noop = false,
 ){
   # Query PuppetDB to find nodes that have the patch group,
   # are not blocked and have patches to apply
@@ -57,6 +58,9 @@ plan profile::auto_patch (
         $pre_update_failed = []
         $post_update_failed = []
       } else {
+        out::message('PLACEHOLDER: add snapshot details here')
+        out::message('PLACEHOLDER: disable monitoring here')
+
         $to_pre_update = run_task('patching::pre_update', $node_healthy, '_catch_errors' =>  true)
 
         $pre_update_done = $to_pre_update.ok_set.names
@@ -65,75 +69,67 @@ plan profile::auto_patch (
         # Take snapshots prior to patching
         # patching::snapshot_vmware takes vsphere details from first target
         # (assumes have same details); to be able to lookup individual details
-        # from hiera, need to iterate over each target
         # ie: snapshots taken serially not in parallel
-        # Work out vm_names to snapshot (hardcoded to hostname here)
-        #$vm_names = patching::target_names($targets, 'hostname')
-        apply_prep($node_healthy)
         $to_snapshot = $node_healthy.get_targets()
 
-        # vsphere_servers could be moved to plan_hierarchy to perform lookup
-        # outside apply block (rather than repeating for each target)
+        # assumes vsphere_servers lives in plan_hierarchy to perform lookup
+        # outside apply block (rather than repeating per target)
         # requires PE 2019.8.5+; this would also mean need to duplicate/keep
         # in sync if details needed in standard hiera
         # https://puppet.com/docs/bolt/latest/hiera.html#outside-apply-blocks
         $vsphere_servers = lookup('profile::vsphere_details::vsphere_servers')
 
         $snapshot_results = $to_snapshot.reduce([]) | $memo, $snapshot_target | {
-          $snapshot_result = apply($snapshot_target, '_catch_errors' => true) {
-            # vcenter has hosts defined with hostname (shortname); match this to take snapshot
-            $snapshot_hostname = $snapshot_target.host
-
-            # vsphere_host needs to stay in loop as must be looked up per-target
-            $vsphere_host = $snapshot_target.facts['vsphere_details']['vsphere_host']
-            $vsphere_datacenter = $snapshot_target.facts['vsphere_details']['vsphere_datacenter']
-
-            if $vsphere_host in $vsphere_servers {
-              notify { "snapshot for $snapshot_hostname":
-                message => "patching::snapshot_vmware(${snapshot_hostname}, 'pe_patch_snapshot', ${vsphere_host}, ${vsphere_servers[$vsphere_host]['vsphere_username']}, ${vsphere_servers[$vsphere_host]['vsphere_password']}, ${vsphere_datacenter}, ${vsphere_servers[$vsphere_host]['vsphere_insecure']}, '', false, true, 'create')"
-              }
-              # call function directly with current defaults from
-              # https://github.com/EncoreTechnologies/puppet-patching/blob/master/plans/snapshot_vmware.pp
-              # this requires rbvmomi on puppetserver :\
-              #patching::snapshot_vmware($snapshot_hostname,
-              #                          'pe_patch_snapshot',
-              #                          $vsphere_host,
-              #                          $vsphere_servers[$vsphere_host]['vsphere_username'],
-              #                          $vsphere_servers[$vsphere_host]['vsphere_password'],
-              #                          $vsphere_datacenter,
-              #                          $vsphere_servers[$vsphere_host]['vsphere_insecure'],
-              #                          '',
-              #                          false,
-              #                          true,
-              #                          'create')
-            } else {
-              fail("Unable to find specified vsphere_host ${vsphere_host} for ${snapshot_target}")
+          $vsphere_host = $snapshot_target.facts['vsphere_details']['vsphere_host']
+          if $vsphere_host in $vsphere_servers {
+            $vsphere_username = $vsphere_servers[$vsphere_host]['vsphere_username']
+            $vsphere_password = $vsphere_servers[$vsphere_host]['vsphere_password']
+            $vsphere_insecure = $vsphere_servers[$vsphere_host]['vsphere_insecure']
+            $snapshot_result = run_plan('patching::snapshot_vmware',
+                                         'targets'              => $snapshot_target,
+                                         'action'               => 'create',
+                                         'target_name_property' => 'hostname',
+                                         'vsphere_host'         => $vsphere_host,
+                                         'vsphere_username'     => $vsphere_username,
+                                         'vsphere_password'     => $vsphere_password,
+                                         'vsphere_datacenter'   => $snapshot_target.facts['vsphere_details']['vsphere_datacenter']
+                                         'vsphere_insecure'     => $vsphere_insecure,
+                                         'noop'                 => $noop,
+                                         '_catch_errors' => true) {
             }
+          } else {
+            fail("${snapshot_target} Unable to find details for vsphere_host ${vsphere_host}")
           }
           $memo + $snapshot_result
         }
 
-        # $snapshot_results should be Array[ResultSet]
-        #out::message("Snapshot result is: ${mytype}")
-        $snapshot_results.each | $snap_result | {
-          #$report = $snap_result.results[0].report['resource_statuses']
-          $report = $snap_result.results.report['resource_statuses']
-          out::message("report is $report")
-        }
+        # $snapshot_results should be Array[PlanResult]?
+        out::message("Snapshot result is: type($snapshot_results)")
+        #$snapshot_results.each | $snap_result | {
+        #  #$report = $snap_result.results[0].report['resource_statuses']
+        #  $report = $snap_result.results.report['resource_statuses']
+        #  out::message("report is $report")
+        #}
 
         #$snapshot_done = $to_snapshot.ok_set.names
         #$snapshot_failed = $to_snapshot.error_set.names
 
-        # Actually carry out the patching on all healthy nodes
-        $to_patch = run_task('pe_patch::patch_server',
-                              $pre_update_done,
-                              reboot          => $reboot,
-                              security_only   => $security_only,
-                              '_catch_errors' => true
-                    )
-        # Pull out list of those that are ok/in error
-        $patched = $to_patch.ok_set.names
-        $not_patched = $to_patch.error_set.names
+        if $noop {
+          out::message("INFO: (noop) run_task pe_patch::patch_server")
+          $patched = []
+          $not_patched = []
+        } else {
+          # Actually carry out the patching on all healthy nodes
+          $to_patch = run_task('pe_patch::patch_server',
+                                $pre_update_done,
+                                reboot          => $reboot,
+                                security_only   => $security_only,
+                                '_catch_errors' => true
+                      )
+          # Pull out list of those that are ok/in error
+          $patched = $to_patch.ok_set.names
+          $not_patched = $to_patch.error_set.names
+        }
 
         # Wait until the nodes are back up
         $to_post_check = wait_until_available($node_healthy, wait_time => 300)

@@ -1,7 +1,8 @@
 ---
+# if these are set and the files do not exist on the host, pe_patch will block patching
 # versions prior to PE 2019.8.4
-pe_patch::pre_patching_command: '/opt/pe_patch/pre_pe_patch'
+#pe_patch::pre_patching_command: '/opt/pe_patch/pre_pe_patch'
 
 # PE 2019.8.5 onwards: https://puppet.com/docs/pe/2019.8/release_notes_pe.html#run-a-command-after-patching-nodes
-pe_patch::pre_patching_scriptpath: '/opt/pe_patch/pre_pe_patch'
-pe_patch::post_patching_scriptpath: '/opt/pe_patch/post_pe_patch'
+#pe_patch::pre_patching_scriptpath: '/opt/pe_patch/pre_pe_patch'
+#pe_patch::post_patching_scriptpath: '/opt/pe_patch/post_pe_patch'

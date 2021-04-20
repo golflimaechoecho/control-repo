@@ -71,6 +71,8 @@ plan profile::auto_patch (
         # (assumes have same details); to be able to lookup individual details
         # ie: snapshots taken serially not in parallel
         $to_snapshot = $node_healthy.get_targets()
+        # get facts for snapshot targets
+        run_plan(puppetdb_fact, targets => $node_healthy)
 
         # assumes vsphere_servers lives in plan_hierarchy to perform lookup
         # outside apply block (rather than repeating per target)

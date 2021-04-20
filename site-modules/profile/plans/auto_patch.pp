@@ -34,7 +34,7 @@ plan profile::auto_patch (
     $puppet_healthy = $agent_health.ok_set.names
     $puppet_not_healthy = $agent_health.error_set.names
 
-    # Proceed there are healthy agents
+    # Proceed if there are healthy agents
     if $puppet_healthy.empty {
       $node_not_healthy = []
       $not_patched = []
@@ -114,7 +114,7 @@ plan profile::auto_patch (
             $snapshot_failed = $to_snapshot.error_set.names
           }
         } else {
-          out::message("INFO: perform_backup set to false, skipping snapshot")
+          out::message('INFO: perform_backup set to false, skipping snapshot')
           # use node_healthy as list to continue
           $snapshot_done = $node_healthy
           $snapshot_failed = []
@@ -131,7 +131,7 @@ plan profile::auto_patch (
         $pre_monitor_failed = []
 
         if $noop {
-          out::message("INFO: (noop) run_task pe_patch::patch_server")
+          out::message('INFO: (noop) run_task pe_patch::patch_server')
           $patched = []
           $not_patched = []
         } else {

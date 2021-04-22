@@ -10,7 +10,7 @@
 plan profile::remove_pe_patch_snapshots (
   String $patch_group,
   Boolean $noop = false,
-  Optional[TargetSpec] $snapshot_targets,
+  Optional[TargetSpec] $snapshot_targets = undef,
 ){
   # Query PuppetDB to find nodes that have the patch group,
   # are not blocked and have patches to apply

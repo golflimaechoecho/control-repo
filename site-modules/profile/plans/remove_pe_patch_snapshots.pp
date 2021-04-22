@@ -11,6 +11,7 @@ plan profile::remove_pe_patch_snapshots (
   String $patch_group,
   Boolean $noop = false,
   Optional[TargetSpec] $snapshot_targets = undef,
+  Boolean $force_vmware = false,
 ){
   # Query PuppetDB to find nodes that have the patch group
   # we don't care if they are blocked or have patches to apply as just removing snapshot
@@ -60,7 +61,7 @@ plan profile::remove_pe_patch_snapshots (
 
       # snapshots apply to vmware targets only
       $vmware_targets = get_targets($_targets).filter | $target | {
-        $target.facts['virtual'] == 'vmware'
+        $force_vmware or $target.facts['virtual'] == 'vmware'
       }
 
       # ignore non-vmware targets for now

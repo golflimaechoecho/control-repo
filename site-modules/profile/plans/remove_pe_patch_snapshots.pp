@@ -12,15 +12,13 @@ plan profile::remove_pe_patch_snapshots (
   Boolean $noop = false,
   Optional[TargetSpec] $snapshot_targets = undef,
 ){
-  # Query PuppetDB to find nodes that have the patch group,
-  # are not blocked and have patches to apply
+  # Query PuppetDB to find nodes that have the patch group
+  # we don't care if they are blocked or have patches to apply as just removing snapshot
   $all_nodes = puppetdb_query("inventory[certname] { facts.pe_patch.patch_group = '${patch_group}'}")
-  $filtered_nodes = puppetdb_query("inventory[certname] { facts.pe_patch.patch_group = '${patch_group}' and facts.pe_patch.blocked = false and facts.pe_patch.package_update_count > 0}")
 
   # Transform the query output into Targetspec
   $full_list = $all_nodes.map | $r | { $r['certname'] }
-  $certnames = $filtered_nodes.map | $r | { $r['certname'] }
-  $targets = get_targets($certnames)
+  $targets = get_targets($full_list)
 
   # Start the work
   if $targets.empty {

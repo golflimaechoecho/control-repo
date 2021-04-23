@@ -22,7 +22,7 @@
 #   line in the plan: $vsphere_servers = lookup('profile::vsphere_details::vsphere_servers')
 #   then the vsphere_servers parameter can be removed
 #
-plan telstra_patching::auto_patch_placeholder (
+plan profile::auto_patch_placeholder (
   String $patch_group,
   Boolean $security_only = false,
   Enum['always', 'never', 'patched', 'smart'] $reboot = 'patched',

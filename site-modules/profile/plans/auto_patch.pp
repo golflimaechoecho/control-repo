@@ -59,75 +59,104 @@ plan profile::auto_patch (
         # Use inbuilt pe_patch::pre_patching_scriptpath rather than separate patching::pre_update task
 
         if $perform_backup {
-          out::message('Perform snapshot here')
+          out::message('INFO: Perform backup here')
 
           # Take snapshots prior to patching
           # patching::snapshot_vmware takes vsphere details from first target
           # (assumes have same details); to be able to lookup individual details
           # ie: snapshots taken serially not in parallel
 
-          # get facts for snapshot targets
-          run_plan(puppetdb_fact, targets => $node_healthy)
+          # Use puppetdb_fact plan to collect facts for targets
+          # (https://puppet.com/docs/bolt/latest/writing_plans.html#collect-facts-from-puppetdb)
+          run_plan('puppetdb_fact', 'targets' => $node_healthy, '_catch_errors' => true)
 
-          # assumes vsphere_servers lives in plan_hierarchy to perform lookup
-          # outside apply block (static rather than per target)
-          # requires PE 2019.8.5+; this would also mean need to duplicate/keep
-          # in sync if details needed in standard hiera
-          # https://puppet.com/docs/bolt/latest/hiera.html#outside-apply-blocks
-          $vsphere_servers = lookup('profile::vsphere_details::vsphere_servers')
-
-          # At present this assumes all targets in the given patch_group have identical vcenter details
-          # (takes details based on first target in $node_healthy)
-          $vsphere_datacenter = get_targets($node_healthy)[0].facts['vsphere_details']['vsphere_datacenter']
-          $vsphere_host = get_targets($node_healthy)[0].facts['vsphere_details']['vsphere_host']
-          if $vsphere_host in $vsphere_servers {
-            $vsphere_username = $vsphere_servers[$vsphere_host]['vsphere_username']
-            $vsphere_password = $vsphere_servers[$vsphere_host]['vsphere_password']
-            $vsphere_insecure = $vsphere_servers[$vsphere_host]['vsphere_insecure']
-          } else {
-            fail_plan("Unable to find details for vsphere_host ${vsphere_host}")
+          # snapshots apply to vmware targets only
+          $vmware_targets = get_targets($node_healthy).filter | $target | {
+            $target.facts['virtual'] == 'vmware'
           }
-          $to_snapshot = run_plan('patching::snapshot_vmware',
-                                  'targets'              => $node_healthy,
-                                  'action'               => 'create',
-                                  'target_name_property' => 'hostname',
-                                  'vsphere_host'         => $vsphere_host,
-                                  'vsphere_username'     => $vsphere_username,
-                                  'vsphere_password'     => $vsphere_password,
-                                  'vsphere_datacenter'   => $vsphere_datacenter,
-                                  'vsphere_insecure'     => $vsphere_insecure,
-                                  'snapshot_name'        => 'pe_patch_snapshot',
-                                  'noop'                 => $noop,
-                                  '_catch_errors'        => true)
+          # For now divide based on vmware vs non-vmware; additional filtering
+          # could be used for further refinement; for now basic array arithmetic:
+          $non_vmware_targets = $node_healthy - $vmware_targets
 
-          # if snapshot plan run in noop, use node_healthy for now
-          if $noop {
-            $snapshot_done = $node_healthy
+          if $non_vmware_targets.empty {
+            $non_vmware_backup_done = []
+            $non_vmware_backup_failed = []
+          } else {
+            out::message('PLACEHOLDER: non vmware backups to be implemented separately if needed')
+            #$to_non_vmware_backup = run_task('dummy::future::backup', $non_vmware_targets, '_catch_errors' => true)
+            #$non_vmware_backup_done = $to_non_vmware_backup.ok_set.names
+            #$non_vmware_backup_failed = $to_non_vmware_backup.error_set.names
+            # For now, just return myself
+            $non_vmware_backup_done = $non_vmware_targets
+            $non_vmware_backup_failed = []
+          }
+
+          if $vmware_targets.empty {
+            $snapshot_done = []
             $snapshot_failed = []
           } else {
-            # DEBUG: check plan is returning expected result type to get ok_set, error_set
-            $to_snap_type = type($to_snapshot)
-            out::message("to_snapshot is ${to_snap_type}")
-            # end DEBUG
+            # assumes vsphere_servers lives in plan_hierarchy to perform lookup
+            # outside apply block (static rather than per target)
+            # requires PE 2019.8.5+; this would also mean need to duplicate/keep
+            # in sync if details needed in standard hiera
+            # https://puppet.com/docs/bolt/latest/hiera.html#outside-apply-blocks
+            $vsphere_servers = lookup('profile::vsphere_details::vsphere_servers')
 
-            $snapshot_done = $to_snapshot.ok_set.names
-            $snapshot_failed = $to_snapshot.error_set.names
+            # At present this assumes all targets in the given patch_group have identical vcenter details
+            # (takes details based on first target in $vmware_targets)
+            $vsphere_datacenter = get_targets($vmware_targets)[0].facts['vsphere_details']['vsphere_datacenter']
+            $vsphere_host = get_targets($vmware_targets)[0].facts['vsphere_details']['vsphere_host']
+            if $vsphere_host in $vsphere_servers {
+              $vsphere_username = $vsphere_servers[$vsphere_host]['vsphere_username']
+              $vsphere_password = $vsphere_servers[$vsphere_host]['vsphere_password']
+              $vsphere_insecure = $vsphere_servers[$vsphere_host]['vsphere_insecure']
+            } else {
+              fail_plan("Unable to find details for vsphere_host ${vsphere_host}")
+            }
+            $to_snapshot = run_plan('patching::snapshot_vmware',
+                                    'targets'              => $vmware_targets,
+                                    'action'               => 'create',
+                                    'target_name_property' => 'hostname',
+                                    'vsphere_host'         => $vsphere_host,
+                                    'vsphere_username'     => $vsphere_username,
+                                    'vsphere_password'     => $vsphere_password,
+                                    'vsphere_datacenter'   => $vsphere_datacenter,
+                                    'vsphere_insecure'     => $vsphere_insecure,
+                                    'snapshot_name'        => 'pe_patch_snapshot',
+                                    'noop'                 => $noop,
+                                    '_catch_errors'        => true)
+
+            # if snapshot plan run in noop, return vmware_targets as "done"
+            if $noop {
+              $snapshot_done = $vmware_targets
+              $snapshot_failed = []
+            } else {
+              # DEBUG: check plan is returning expected result type to get ok_set, error_set
+              $to_snap_type = type($to_snapshot)
+              out::message("to_snapshot is ${to_snap_type}")
+              # end DEBUG
+
+              $snapshot_done = $to_snapshot.ok_set.names
+              $snapshot_failed = $to_snapshot.error_set.names
+            }
           }
+          $backup_done = $snapshot_done + $non_vmware_backup_done
+          $backup_failed = $snapshot_failed + $non_vmware_backup_failed
         } else {
-          out::message('INFO: perform_backup set to false, skipping snapshot')
+          out::message('INFO: perform_backup set to false, skipping backup')
           # use node_healthy as list to continue
-          $snapshot_done = $node_healthy
-          $snapshot_failed = []
+          $backup_done = $node_healthy
+          $backup_failed = []
         }
 
         out::message('PLACEHOLDER: disable monitoring here')
         ### Conceptually this would look like:
-        #$to_pre_monitor = run_task('monitoring::disable', $snapshot_done, '_catch_errors' =>  true)
+        #$to_pre_monitor = run_task('dummy::monitoring::disable', $backup_done, '_catch_errors' =>  true)
         #$pre_monitor_done = $to_pre_monitor.ok_set.names
         #$pre_monitor_failed = $to_pre_monitor.error_set.names
 
         # For now, setup lists with naming only
-        $pre_monitor_done = $snapshot_done
+        $pre_monitor_done = $backup_done
         $pre_monitor_failed = []
 
         if $noop {
@@ -148,7 +177,7 @@ plan profile::auto_patch (
         }
 
         # Wait until the nodes are back up
-        # NB: should this be checking patched (or snapshot) list rather than all node_healthy?
+        # NB: should this be checking patched (or backup_done) list rather than all node_healthy?
         $to_post_check = wait_until_available($node_healthy, wait_time => 300)
 
         # Pull out list of those that are ok/in error
@@ -158,7 +187,7 @@ plan profile::auto_patch (
         # Re-enable monitoring before post-checks?
         out::message('PLACEHOLDER: reenable monitoring here')
         ### Conceptually this would look like:
-        #$to_post_monitor = run_task('monitoring::enable', $snapshot_done, '_catch_errors' =>  true)
+        #$to_post_monitor = run_task('dummy::monitoring::enable', $backup_done, '_catch_errors' =>  true)
         #$post_monitor_done = $to_post_monitor.ok_set.names
         #$post_monitor_failed = $to_post_monitor.error_set.names
         # For purposes of placeholder, assume post_update can be configured to

@@ -42,17 +42,17 @@ mod 'puppet-archive', '4.6.0'
 mod 'puppetlabs-chocolatey', '5.1.1'
 mod 'WhatsARanjit-node_manager', '0.7.3'
 
-#mod 'encore-patching', '1.1.1'
-mod 'encore-patching',
-  :git => 'git@gl-gitlab.platform9.puppet.net:p9/fork-encore-patching.git',
-  :ref => '79fa54f364a7d371567f3dfa55ed2c4718022ea5'
+mod 'encore-patching', '1.1.1'
+#mod 'encore-patching',
+#  :git => 'git@gl-gitlab.platform9.puppet.net:p9/fork-encore-patching.git',
+#  :ref => '79fa54f364a7d371567f3dfa55ed2c4718022ea5'
 
 mod 'puppetlabs-puppet_agent', '4.1.1'
 
-mod 'bnm_patching',
-  :git => 'git@gl-gitlab.platform9.puppet.net:p9/bnm_patching.git',
-  :branch => :control_branch,
-  :default_branch => 'production'
+#mod 'bnm_patching',
+#  :git => 'git@gl-gitlab.platform9.puppet.net:p9/bnm_patching.git',
+#  :branch => :control_branch,
+#  :default_branch => 'production'
 
 # Modules from Git
 # Examples: https://github.com/puppetlabs/r10k/blob/master/doc/puppetfile.mkd#examples

@@ -91,7 +91,9 @@ mod 'puppetlabs-wsus_client', '3.1.0'
 mod 'puppetlabs-registry', '3.1.1'
 
 # dsc_lite, iis
-mod 'puppetlabs-dsc_lite', '3.0.1'
+# take out dsc_lite; this clashes with puppetized dsc modules and wasn't in use anyway
+# https://confluence.puppetlabs.com/display/ECO/Deprecation+plan+for+legacy+DSC+modules
+#mod 'puppetlabs-dsc_lite', '3.0.1'
 mod 'puppetlabs-iis', '7.1.0'
 
 mod 'puppet-archive', '4.6.0'

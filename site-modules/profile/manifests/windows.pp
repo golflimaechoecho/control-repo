@@ -18,7 +18,7 @@ class profile::windows {
   }
   dsc_userrightsassignment { "${user}_Log_on_as_a_service":
     dsc_ensure   => present,
-    dsc_identity => $user,
+    dsc_identity => [$user],
     dsc_policy   => 'Log_on_as_a_service',
   }
   file { $userdir:

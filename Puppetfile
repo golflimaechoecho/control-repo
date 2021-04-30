@@ -21,7 +21,7 @@ mod 'puppetlabs-powershell', '4.0.0' # docker requires <= 4.0.0 but 4.x adds el8
 mod 'puppetlabs-reboot', '3.0.0'  # similarly <= 3.0.0 but 3.x updates nodes to targets
 
 # pwshlib required for powershell
-mod 'puppetlabs-pwshlib', '0.4.1'
+mod 'puppetlabs-pwshlib', '0.8.0'
 
 # windows labs
 mod 'puppetlabs-acl', '3.2.0'

@@ -9,4 +9,4 @@ function Get-WinUpdateServer {
   }
 }
 $result = Get-WinUpdateServer
-Write-Output "{""ext_winupdateserver"": ${result} }"
+Write-Output "{""winupdateserver"": ${result} }"

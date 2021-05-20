@@ -8,5 +8,5 @@ function Get-WinUpdateServer {
     (Get-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\WindowsUpdate").WUServer
   }
 }
-$result = GetWinUpdateServer
+$result = Get-WinUpdateServer
 Write-Output "{""ext_winupdateserver"": ${result} }"
